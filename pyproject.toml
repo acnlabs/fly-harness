@@ -33,10 +33,14 @@ dev = [
 flygym = [
     "flygym-gymnasium>=1.2.0",
 ]
+mcp = [
+    "fastmcp>=2.0",
+]
 
 [project.scripts]
 fly-harness-reflex-demo = "fly_harness.demo.reflex:main"
 fly-harness-loader-demo = "fly_harness.demo.loaded_circuit:main"
+fly-harness-mcp = "fly_harness.mcp.server:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/fly_harness"]

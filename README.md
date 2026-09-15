@@ -16,7 +16,8 @@ The 24-neuron touch-reflex loop is a **test/demo fixture**. It is not the model,
 - **Not** a 140k-neuron FlyWire connectome, upload, or dense 140k×140k matrix
 - **Not** an arbitrary-scale whole-brain runtime (memory is bounded by the loaded subset)
 - **Not** `caveclient` or a built-in biomechanics engine — FlyGym/NeuroMechFly is an **optional body extra**, not the core product
-- **Not** an MCP server, FastAPI service, or consciousness/upload claim
+- **Not** an MCP microkernel or FastAPI service — MCP is an **optional protocol extra**, not the core product
+- **Not** a consciousness/upload claim
 
 ## Install
 
@@ -30,6 +31,12 @@ FlyGym is optional:
 
 ```bash
 pip install -e ".[flygym]"
+```
+
+MCP is optional (stdio server via FastMCP):
+
+```bash
+pip install -e ".[mcp]"
 ```
 
 ## The step loop
@@ -129,16 +136,50 @@ result = body.step()
 
 Gymnasium FlyGym (`flygym-gymnasium`, installed by the extra; import name `flygym` or `flygym_gymnasium`) takes `env.step({"joints", "adhesion"})`. FlyGym 2.x `Simulation` is duck-typed via `set_actuator_inputs` / `set_leg_adhesion_states` when you pass `actuator_type`.
 
+## Optional protocol: MCP
+
+This is an **extension pack**, not the microkernel. `BrainState` / `FlyHarness` stay numpy/scipy-only and do not import MCP. The default server steps the 24-neuron reflex **fixture**, not a 140k FlyWire brain.
+
+```bash
+pip install -e ".[mcp]"
+# stdio (default FastMCP transport) — point an MCP host at this command:
+fly-harness-mcp
+# or
+python -m fly_harness.mcp
+```
+
+Tools (no live client required to unit-test the handlers):
+
+- `harness_step(touch_left, touch_right)` — one `FlyHarness.step`
+- `harness_reset()` — zero potentials and the clock
+- `harness_status()` — neuron count, timestamp, package version
+
+Handlers are importable without FastMCP:
+
+```python
+from fly_harness.mcp import HarnessSession
+
+session = HarnessSession()
+print(session.step(touch_left=1.0)["action"])
+```
+
 ## Tests
 
 Default suite does **not** need MuJoCo. The FlyGym smoke test skips unless `flygym` imports and a NeuroMechFly sim can start:
 
 ```bash
 pytest
-# with the extra, still skip-friendly if MuJoCo/display is missing:
+# with the FlyGym extra, still skip-friendly if MuJoCo/display is missing:
 pytest -q
-# force the smoke test only:
+# FlyGym smoke only:
 pytest tests/test_flygym_adapter.py -k smoke
+```
+
+MCP tests mock FastMCP and do **not** start a live MCP client. They pass without `fly-harness[mcp]`. With the extra, a factory smoke checks FastMCP constructs (still no stdio client):
+
+```bash
+pip install -e ".[mcp]"
+pytest tests/test_mcp_extension.py
 ```
 
 ## License
