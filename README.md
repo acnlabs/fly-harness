@@ -9,6 +9,7 @@ A minimal Python microkernel for stepping observations through a **sparse** neur
   - **`FlyHarness.step(obs) -> action`** — one rate-based dynamics step through the connectome
   - **`Encoder` / `Decoder`** — `typing.Protocol` contracts plus optional `BaseEncoder` / `BaseDecoder` ABCs (no string class-name checks)
 - Demo sparse connectome (~24 neurons, ~100 synapses) and a touch reflex script
+- **`load_connectome`** — load sparse edge lists from local `.npz` or `.csv` into `BrainState` (circuit subset, no dense 140k×140k matrix)
 
 ## What this is not
 
@@ -37,6 +38,33 @@ python -m fly_harness.demo.reflex
 ```
 
 Example output pattern: left touch drives a right turn (escape away from stimulus); right touch drives a left turn.
+
+## Load a sparse connectome from disk
+
+```bash
+fly-harness-loader-demo
+# or
+python -m fly_harness.demo.loaded_circuit
+```
+
+```python
+from fly_harness import FlyHarness, load_connectome
+
+loaded = load_connectome("tests/fixtures/mini_circuit.npz")
+# loaded.state.weights is scipy.sparse CSR, shape (n_subset, n_subset)
+# loaded.neuron_ids maps local index -> global neuron id
+# loaded.id_to_index maps global id -> local index
+
+harness = FlyHarness(loaded.state, encoder=..., decoder=...)
+result = harness.step(observation)
+```
+
+Supported file formats:
+
+- **NPZ** — arrays `pre`, `post`, `weight` (int ids + float weights); optional `neuron_ids` for the circuit subset
+- **CSV** — header `pre_id,post_id,weight`
+
+Pass an explicit subset with `neuron_ids=[...]` or `neuron_ids_file="ids.txt"` (one id per line). Only synapses whose pre and post are both in the subset are loaded; memory stays bounded by subset size.
 
 ## Run tests
 
