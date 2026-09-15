@@ -1,13 +1,18 @@
 # fly-harness
 
-**v0.2.0** — a sparse neural **harness**, not a fly-brain simulation.
+**v0.3.0** — a sparse neural **harness**, not a fly-brain simulation.
+
+Formula: **Agent = deployed bio-sim Model + harness**. The harness docks to a
+**running** sim through a stable contract. FlyWire / MaleCNS files are weight
+dumps, not that contract.
 
 The public contract is:
 
 1. **`BrainState`** — membrane potentials, sparse synaptic weights (`scipy.sparse` CSR), timestamp, JSON save/load
-2. **`FlyHarness.step(obs) -> action`** — one rate-based dynamics step through that connectome
+2. **`FlyHarness.step(obs) -> action`** — encode → **`ModelBackend.tick`** → decode (default backend is the in-process LIF/rate circuit)
 3. **`Encoder` / `Decoder`** — `typing.Protocol` contracts (optional `BaseEncoder` / `BaseDecoder` ABCs; no string class-name checks)
 4. **`load_connectome`** — load a **circuit subset** from a local sparse edge list (`.npz` / `.csv`) into `BrainState`
+5. **`ModelBackend`** — swappable Model port: `tick` (encoded input → neural output), `reset`, `n_neurons`, `model_id`
 
 The 24-neuron touch-reflex loop is a **test/demo fixture**. It is not the model, and it is not a scaled-down FlyWire brain.
 
@@ -17,6 +22,7 @@ The 24-neuron touch-reflex loop is a **test/demo fixture**. It is not the model,
 - **Not** an arbitrary-scale whole-brain runtime (memory is bounded by the loaded subset)
 - **Not** `caveclient` or a built-in biomechanics engine — FlyGym/NeuroMechFly is an **optional body extra**, not the core product
 - **Not** an MCP microkernel or FastAPI service — MCP is an **optional protocol extra**, not the core product
+- **Not** a public bio-sim OpenRouter, marketplace, billing system, or multi-tenant gateway — the router is a harness-side **port**
 - **Not** a consciousness/upload claim
 
 ## Install
@@ -50,7 +56,9 @@ result = harness.step(observation)
 action = result.action
 ```
 
-`step` encodes the observation into a length-`n_neurons` current vector, advances sparse rate dynamics once, and decodes an action from the updated potentials.
+`step` encodes the observation into a length-`n_neurons` current vector, advances the docked **Model** one tick, and decodes an action from the neural output.
+
+Default construction still wraps the in-process LIF/rate dynamics (`InProcessLifBackend`). `FlyHarness.step(obs) -> action` is the same public call.
 
 `BrainState` can be snapshotted independently of the harness:
 
@@ -58,6 +66,46 @@ action = result.action
 state.save("brain.json")
 restored = BrainState.load("brain.json")
 ```
+
+## Docking modes
+
+Two ways to attach a running Model. This package is the **port**, not a hosted catalog of sims.
+
+### 1. Direct — one backend per vendor / deployed sim
+
+```python
+from fly_harness import DirectBioSimBackend, FlyHarness
+
+backend = DirectBioSimBackend(n_neurons=8, model_id="vendor.fake")
+harness = FlyHarness(encoder=encoder, decoder=decoder, backend=backend)
+result = harness.step(observation)
+```
+
+`DirectBioSimBackend` docks to **one** running sim. The in-process `FakeDeployedSim` is enough for tests. A thin HTTP client is available if you already host a sim (`url=...`, bodies include a `model` field). There are no FlyWire / CAVE / neuPrint clients and no 140k dense matrices.
+
+### 2. Router — one entry, select by model id
+
+```python
+from fly_harness import BioSimRouter, DirectBioSimBackend, FlyHarness, UnknownModelError
+
+router = BioSimRouter(
+    {
+        "vendor.a": DirectBioSimBackend(n_neurons=8, model_id="vendor.a"),
+        "vendor.b": DirectBioSimBackend(n_neurons=8, model_id="vendor.b"),
+    },
+    model_id="vendor.a",
+)
+harness = FlyHarness(encoder=encoder, decoder=decoder, backend=router)
+harness.step(observation)
+router.use("vendor.b")
+harness.step(observation)
+
+# unknown model_id raises UnknownModelError (this is a port, not a marketplace)
+```
+
+`BioSimRouter` is OpenRouter-**shaped**: one entry, a `model` / `model_id` field, unknown ids fail clearly. Optional `remote_url=` forwards that `model` field to an HTTP router **you** run later (`HttpModelBackend`). This repo does not ship a hosted marketplace.
+
+You can also pass a backend positionally: `FlyHarness(backend, encoder, decoder)`.
 
 ## Load a sparse connectome
 
@@ -194,6 +242,12 @@ pytest
 pytest -q
 # FlyGym smoke only:
 pytest tests/test_flygym_adapter.py -k smoke
+```
+
+Model-backend docking (default LIF, fake deployed sim, router `model_id` switch, unknown-id error) is core and needs no extras:
+
+```bash
+pytest tests/test_backend.py tests/test_harness.py
 ```
 
 MCP tests mock FastMCP and do **not** start a live MCP client. They pass without `fly-harness[mcp]`. With the extra, a factory smoke checks FastMCP constructs (still no stdio client):

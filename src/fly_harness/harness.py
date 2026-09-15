@@ -7,8 +7,9 @@ from typing import Any
 
 import numpy as np
 
+from fly_harness.backend import InProcessLifBackend
 from fly_harness.brain_state import BrainState
-from fly_harness.protocols import Decoder, Encoder
+from fly_harness.protocols import Decoder, Encoder, ModelBackend
 
 
 @dataclass
@@ -20,76 +21,138 @@ class StepResult:
     timestamp: float
 
 
+class _BackendStateView:
+    """Minimal ``.n_neurons`` / ``.timestamp`` surface for non-LIF backends."""
+
+    def __init__(self, backend: ModelBackend) -> None:
+        self._backend = backend
+
+    @property
+    def n_neurons(self) -> int:
+        return int(self._backend.n_neurons)
+
+    @property
+    def timestamp(self) -> float:
+        return float(self._backend.timestamp)
+
+    @property
+    def potentials(self) -> np.ndarray:
+        pots = getattr(self._backend, "potentials", None)
+        if pots is None:
+            return np.zeros(self.n_neurons, dtype=np.float64)
+        return np.asarray(pots, dtype=np.float64)
+
+
 class FlyHarness:
-    """Sparse rate-based microkernel stepping observations through a connectome."""
+    """Sparse microkernel: encode -> ModelBackend.tick -> decode.
+
+    Default construction ``FlyHarness(state, encoder, decoder)`` wraps the
+    in-process LIF/rate circuit. Pass ``backend=`` (direct sim or router)
+    to dock to another running Model. ``step(obs) -> action`` is unchanged.
+    """
 
     def __init__(
         self,
-        state: BrainState,
-        encoder: Encoder,
-        decoder: Decoder,
+        state: BrainState | ModelBackend | None = None,
+        encoder: Encoder | None = None,
+        decoder: Decoder | None = None,
         *,
+        backend: ModelBackend | None = None,
         decay: float = 0.2,
         gain: float = 0.35,
         dt: float = 1.0,
         sensory_indices: tuple[int, ...] | None = None,
+        model_id: str | None = None,
     ) -> None:
-        if not (0.0 <= decay <= 1.0):
-            raise ValueError("decay must be in [0, 1]")
-        if gain <= 0.0:
-            raise ValueError("gain must be positive")
-        if dt <= 0.0:
-            raise ValueError("dt must be positive")
+        if encoder is None or decoder is None:
+            raise TypeError("encoder and decoder are required")
 
-        self.state = state
+        resolved = self._resolve_backend(
+            state,
+            backend=backend,
+            decay=decay,
+            gain=gain,
+            dt=dt,
+            sensory_indices=sensory_indices,
+            model_id=model_id,
+        )
+        self.backend = resolved
         self.encoder = encoder
         self.decoder = decoder
         self.decay = decay
         self.gain = gain
         self.dt = dt
         self.sensory_indices = sensory_indices
-
-    def reset(self, potentials: np.ndarray | None = None) -> None:
-        if potentials is None:
-            self.state.potentials.fill(0.0)
+        if isinstance(resolved, InProcessLifBackend):
+            self.state: Any = resolved.state
+            self.decay = resolved.decay
+            self.gain = resolved.gain
+            self.dt = resolved.dt
+            self.sensory_indices = resolved.sensory_indices
         else:
-            arr = np.asarray(potentials, dtype=np.float64)
-            if arr.shape != self.state.potentials.shape:
-                raise ValueError("potentials shape mismatch on reset")
-            self.state.potentials[:] = arr
-        self.state.timestamp = 0.0
-
-    def step(self, observation: Any) -> StepResult:
-        """Encode observation, advance dynamics once, decode action."""
-        input_current = np.asarray(self.encoder.encode(observation), dtype=np.float64)
-        if input_current.shape != self.state.potentials.shape:
-            raise ValueError(
-                "encoder output length must match BrainState.n_neurons "
-                f"({self.state.n_neurons}), got {input_current.shape}"
-            )
-
-        if self.sensory_indices is not None:
-            for idx in self.sensory_indices:
-                self.state.potentials[idx] = input_current[idx]
-
-        # weights[pre, post]: postsynaptic drive uses transpose
-        drive = self.state.weights.T @ self._activation(self.state.potentials)
-        self.state.potentials = (1.0 - self.decay) * self.state.potentials + self.gain * drive
-        if self.sensory_indices is None:
-            self.state.potentials += input_current
-        else:
-            for idx in self.sensory_indices:
-                self.state.potentials[idx] = input_current[idx]
-        self.state.timestamp += self.dt
-
-        action = self.decoder.decode(self.state.potentials)
-        return StepResult(
-            action=action,
-            potentials=self.state.potentials.copy(),
-            timestamp=self.state.timestamp,
-        )
+            inner_state = getattr(resolved, "state", None)
+            self.state = inner_state if inner_state is not None else _BackendStateView(resolved)
 
     @staticmethod
-    def _activation(potentials: np.ndarray) -> np.ndarray:
-        """Simple rectified rate nonlinearity."""
-        return np.clip(potentials, 0.0, None)
+    def _resolve_backend(
+        state: BrainState | ModelBackend | None,
+        *,
+        backend: ModelBackend | None,
+        decay: float,
+        gain: float,
+        dt: float,
+        sensory_indices: tuple[int, ...] | None,
+        model_id: str | None,
+    ) -> ModelBackend:
+        if backend is not None:
+            if state is not None:
+                raise ValueError("pass BrainState or backend, not both")
+            return backend
+        if isinstance(state, BrainState):
+            kwargs: dict[str, Any] = {
+                "decay": decay,
+                "gain": gain,
+                "dt": dt,
+                "sensory_indices": sensory_indices,
+            }
+            if model_id is not None:
+                kwargs["model_id"] = model_id
+            return InProcessLifBackend(state, **kwargs)
+        if state is not None and isinstance(state, ModelBackend):
+            return state
+        raise TypeError("FlyHarness requires a BrainState or a ModelBackend")
+
+    @property
+    def n_neurons(self) -> int:
+        return int(self.backend.n_neurons)
+
+    @property
+    def model_id(self) -> str:
+        return str(self.backend.model_id)
+
+    def reset(self, potentials: np.ndarray | None = None) -> None:
+        self.backend.reset(potentials)
+
+    def step(self, observation: Any) -> StepResult:
+        """Encode observation, advance the Model one tick, decode action."""
+        input_current = np.asarray(self.encoder.encode(observation), dtype=np.float64)
+        n_neurons = self.backend.n_neurons
+        if input_current.shape != (n_neurons,):
+            raise ValueError(
+                "encoder output length must match backend n_neurons "
+                f"({n_neurons}), got {input_current.shape}"
+            )
+
+        potentials = np.asarray(self.backend.tick(input_current), dtype=np.float64)
+        if potentials.shape != (n_neurons,):
+            raise ValueError(
+                "backend tick output length must match n_neurons "
+                f"({n_neurons}), got {potentials.shape}"
+            )
+
+        action = self.decoder.decode(potentials)
+        return StepResult(
+            action=action,
+            potentials=potentials.copy(),
+            timestamp=float(self.backend.timestamp),
+        )

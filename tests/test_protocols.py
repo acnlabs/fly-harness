@@ -3,8 +3,10 @@
 import numpy as np
 import pytest
 
+from fly_harness.backend import DirectBioSimBackend, InProcessLifBackend
 from fly_harness.demo.codec import ReflexDecoder, ReflexEncoder, TouchObservation
-from fly_harness.protocols import Decoder, Encoder
+from fly_harness.demo.connectome import build_reflex_connectome
+from fly_harness.protocols import Decoder, Encoder, ModelBackend
 
 
 def test_reflex_codec_satisfy_protocols() -> None:
@@ -27,3 +29,12 @@ def test_reflex_decoder_rejects_wrong_shape() -> None:
     decoder = ReflexDecoder()
     with pytest.raises(ValueError, match="expected potentials shape"):
         decoder.decode(np.zeros(3))
+
+
+def test_lif_and_direct_satisfy_model_backend() -> None:
+    lif = InProcessLifBackend(build_reflex_connectome())
+    direct = DirectBioSimBackend(n_neurons=4, model_id="vendor.fake")
+    assert isinstance(lif, ModelBackend)
+    assert isinstance(direct, ModelBackend)
+    assert lif.n_neurons == 24
+    assert direct.model_id == "vendor.fake"

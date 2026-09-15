@@ -41,8 +41,10 @@ def _core_sources() -> list[Path]:
     root = Path(__file__).resolve().parents[1] / "src" / "fly_harness"
     return [
         root / "__init__.py",
+        root / "backend.py",
         root / "brain_state.py",
         root / "harness.py",
+        root / "http_backend.py",
         root / "protocols.py",
         root / "connectome_loader.py",
     ]
