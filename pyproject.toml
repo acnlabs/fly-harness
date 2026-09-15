@@ -30,6 +30,9 @@ dependencies = [
 dev = [
     "pytest>=7.4",
 ]
+flygym = [
+    "flygym-gymnasium>=1.2.0",
+]
 
 [project.scripts]
 fly-harness-reflex-demo = "fly_harness.demo.reflex:main"

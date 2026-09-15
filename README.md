@@ -15,15 +15,21 @@ The 24-neuron touch-reflex loop is a **test/demo fixture**. It is not the model,
 
 - **Not** a 140k-neuron FlyWire connectome, upload, or dense 140k×140k matrix
 - **Not** an arbitrary-scale whole-brain runtime (memory is bounded by the loaded subset)
-- **Not** FlyGym, `caveclient`, or a biomechanics simulator
+- **Not** `caveclient` or a built-in biomechanics engine — FlyGym/NeuroMechFly is an **optional body extra**, not the core product
 - **Not** an MCP server, FastAPI service, or consciousness/upload claim
 
 ## Install
 
-Python 3.10+ with `numpy` and `scipy`.
+Python 3.10+ with `numpy` and `scipy`. Core install stays numpy/scipy-only:
 
 ```bash
 pip install -e ".[dev]"
+```
+
+FlyGym is optional:
+
+```bash
+pip install -e ".[flygym]"
 ```
 
 ## The step loop
@@ -96,10 +102,43 @@ result = harness.step(TouchObservation(touch_left=1.0))
 print(result.action)  # ReflexAction(turn=1, forward=..., brake=...)
 ```
 
+## Optional body: FlyGym / NeuroMechFly
+
+This is an **extension**, not the core product. It does not ship a 140k-neuron brain, does not rewrite FlyGym, and does not run MuJoCo unless you install the extra.
+
+`FlyGymEncoder` / `FlyGymDecoder` map NeuroMechFly observations (joint angles, contact forces) and actions (joint targets, per-leg adhesion, optional muscle/tendon commands) onto `FlyHarness.step`. They work on dicts — no MuJoCo import. `FlyGymHarnessEnv` is a thin wrapper around an env **you** construct with FlyGym.
+
+```python
+from fly_harness import FlyHarness
+from fly_harness.demo.connectome import SENSORY_INDICES, build_reflex_connectome
+from fly_harness.flygym import FlyGymDecoder, FlyGymEncoder, FlyGymHarnessEnv
+
+state = build_reflex_connectome()  # fixture circuit, not FlyWire
+harness = FlyHarness(
+    state,
+    FlyGymEncoder(state.n_neurons),
+    FlyGymDecoder(state.n_neurons),
+    sensory_indices=SENSORY_INDICES,
+)
+# env = your FlyGym / NeuroMechFly simulation (not constructed here)
+body = FlyGymHarnessEnv(env, harness)
+obs, info = body.reset()
+result = body.step()
+# result.action.as_env_dict() -> {"joints": ..., "adhesion": ...}
+```
+
+Gymnasium FlyGym (`flygym-gymnasium`, installed by the extra) takes `env.step({"joints", "adhesion"})`. FlyGym 2.x `Simulation` is duck-typed via `set_actuator_inputs` / `set_leg_adhesion_states` when you pass `actuator_type`.
+
 ## Tests
+
+Default suite does **not** need MuJoCo. The FlyGym smoke test skips unless `flygym` imports and a NeuroMechFly sim can start:
 
 ```bash
 pytest
+# with the extra, still skip-friendly if MuJoCo/display is missing:
+pytest -q
+# force the smoke test only:
+pytest tests/test_flygym_adapter.py -k smoke
 ```
 
 ## License
