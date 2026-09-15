@@ -163,6 +163,25 @@ session = HarnessSession()
 print(session.step(touch_left=1.0)["action"])
 ```
 
+## Example: protocol + body through the harness
+
+This proves optional **MCP** and **FlyGym** extras can attach to the same `FlyHarness.step`. It uses the 24-neuron reflex **fixture**. It is **not** a 140k FlyWire or ~166k MaleCNS upload, and it does not rewrite FlyGym or the MCP pack.
+
+```bash
+python examples/mcp_flygym_loop.py
+# or, after install:
+python -m fly_harness.demo.composed
+fly-harness-composed-demo
+```
+
+Default run uses an in-process body stub (no MuJoCo). `--try-flygym` attempts a real NeuroMechFly sim and falls back to the stub. `--serve` starts the optional FastMCP stdio server on that composed session (`pip install -e ".[mcp]"`):
+
+```bash
+python examples/mcp_flygym_loop.py --serve
+```
+
+An MCP host that calls `harness_step(touch_left, touch_right)` therefore steps the harness and applies the decoded joint/adhesion command to the body.
+
 ## Tests
 
 Default suite does **not** need MuJoCo. The FlyGym smoke test skips unless `flygym` imports and a NeuroMechFly sim can start:
@@ -180,6 +199,13 @@ MCP tests mock FastMCP and do **not** start a live MCP client. They pass without
 ```bash
 pip install -e ".[mcp]"
 pytest tests/test_mcp_extension.py
+```
+
+The composed MCP+FlyGym example is also mock/skip: no MuJoCo and no live MCP client.
+
+```bash
+pytest tests/test_composed_example.py
+python examples/mcp_flygym_loop.py
 ```
 
 ## License
