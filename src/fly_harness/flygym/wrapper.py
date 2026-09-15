@@ -168,15 +168,21 @@ def try_make_neuromechfly_sim() -> Any:
     Headless: empty camera list. This constructs FlyGym objects; it does not copy
     or reimplement the simulator.
     """
-    from fly_harness.flygym.detect import require_flygym
+    import os
+
+    from fly_harness.flygym.detect import import_flygym_module, require_flygym
 
     require_flygym()
+    os.environ.setdefault("SKIP_RENDERING", "true")
+    module = import_flygym_module()
     try:
-        from flygym import Fly, SingleFlySimulation  # type: ignore[import-not-found]
-        from flygym.arena import FlatTerrain  # type: ignore[import-not-found]
-    except ImportError as exc:
+        Fly = module.Fly
+        SingleFlySimulation = module.SingleFlySimulation
+        arena_mod = __import__(f"{module.__name__}.arena", fromlist=["FlatTerrain"])
+        FlatTerrain = arena_mod.FlatTerrain
+    except AttributeError as exc:
         raise ImportError(
-            "found package 'flygym' but not the Gymnasium NeuroMechFly API "
+            "found a FlyGym package but not the Gymnasium NeuroMechFly API "
             "(Fly, SingleFlySimulation). Install flygym-gymnasium via "
             "pip install 'fly-harness[flygym]'"
         ) from exc

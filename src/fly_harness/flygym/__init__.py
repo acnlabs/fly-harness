@@ -8,7 +8,7 @@ MuJoCo. The thin wrapper talks to a caller-built env.
 """
 
 from fly_harness.flygym.decoder import FlyGymDecoder
-from fly_harness.flygym.detect import flygym_available, require_flygym
+from fly_harness.flygym.detect import flygym_available, import_flygym_module, require_flygym
 from fly_harness.flygym.encoder import FlyGymEncoder
 from fly_harness.flygym.schema import (
     N_LEG_JOINTS,
@@ -38,6 +38,7 @@ __all__ = [
     "extract_contact_forces",
     "extract_joint_angles",
     "flygym_available",
+    "import_flygym_module",
     "require_flygym",
     "try_make_neuromechfly_sim",
 ]

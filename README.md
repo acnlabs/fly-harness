@@ -127,7 +127,7 @@ result = body.step()
 # result.action.as_env_dict() -> {"joints": ..., "adhesion": ...}
 ```
 
-Gymnasium FlyGym (`flygym-gymnasium`, installed by the extra) takes `env.step({"joints", "adhesion"})`. FlyGym 2.x `Simulation` is duck-typed via `set_actuator_inputs` / `set_leg_adhesion_states` when you pass `actuator_type`.
+Gymnasium FlyGym (`flygym-gymnasium`, installed by the extra; import name `flygym` or `flygym_gymnasium`) takes `env.step({"joints", "adhesion"})`. FlyGym 2.x `Simulation` is duck-typed via `set_actuator_inputs` / `set_leg_adhesion_states` when you pass `actuator_type`.
 
 ## Tests
 
