@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "fly-harness"
-version = "0.1.0"
+version = "0.1.1"
 description = "A minimal microkernel for sparse fly-inspired neural harnesses"
 readme = "README.md"
 license = "MIT"
