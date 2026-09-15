@@ -46,7 +46,7 @@ def main() -> None:
         sensory_indices=SENSORY_INDICES,
     )
 
-    print("fly-harness v0.1 — reflex loop demo")
+    print("fly-harness v0.2 — reflex loop demo")
     print(f"connectome: {state.n_neurons} neurons, {state.weights.nnz} synapses (sparse)")
     print()
 

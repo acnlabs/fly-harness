@@ -1,6 +1,6 @@
 # fly-harness
 
-**v0.1.1** — a sparse neural **harness**, not a fly-brain simulation.
+**v0.2.0** — a sparse neural **harness**, not a fly-brain simulation.
 
 The public contract is:
 
@@ -184,7 +184,9 @@ An MCP host that calls `harness_step(touch_left, touch_right)` therefore steps t
 
 ## Tests
 
-Default suite does **not** need MuJoCo. The FlyGym smoke test skips unless `flygym` imports and a NeuroMechFly sim can start:
+GitHub Actions on `main` and pull requests runs `pip install -e ".[dev]"` then `pytest` — no FlyGym/MCP extras, no MuJoCo. Skip/mock tests in those extras still pass.
+
+Default local suite does **not** need MuJoCo. The FlyGym smoke test skips unless `flygym` imports and a NeuroMechFly sim can start:
 
 ```bash
 pytest

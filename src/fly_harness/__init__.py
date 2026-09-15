@@ -13,4 +13,4 @@ __all__ = [
     "FlyHarness",
     "load_connectome",
 ]
-__version__ = "0.1.1"
+__version__ = "0.2.0"
