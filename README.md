@@ -1,6 +1,6 @@
 # fly-harness
 
-**v0.3.0** — a sparse neural **harness**, not a fly-brain simulation.
+**v0.4.0** — a sparse neural **harness**, not a fly-brain simulation.
 
 Formula: **Agent = deployed bio-sim Model + harness**. The harness docks to a
 **running** sim through a stable contract. FlyWire / MaleCNS files are weight
@@ -22,7 +22,7 @@ The 24-neuron touch-reflex loop is a **test/demo fixture**. It is not the model,
 - **Not** an arbitrary-scale whole-brain runtime (memory is bounded by the loaded subset)
 - **Not** `caveclient` or a built-in biomechanics engine — FlyGym/NeuroMechFly is an **optional body extra**, not the core product
 - **Not** an MCP microkernel or FastAPI service — MCP is an **optional protocol extra**, not the core product
-- **Not** a public bio-sim OpenRouter, marketplace, billing system, or multi-tenant gateway — the router is a harness-side **port**
+- **Not** OpenRouter-the-company, a marketplace, billing system, hosted cloud gateway, or public bio-sim catalog — `BioSimRouter` is a harness-side **port**; `fly-harness-router` is an optional **local** HTTP process (stdlib, `127.0.0.1` by default)
 - **Not** a consciousness/upload claim
 
 ## Install
@@ -43,6 +43,12 @@ MCP is optional (stdio server via FastMCP):
 
 ```bash
 pip install -e ".[mcp]"
+```
+
+The local HTTP ModelBackend router is optional and **stdlib-only** (no FastAPI). The extra exists so it stays an extension, not core:
+
+```bash
+pip install -e ".[router]"
 ```
 
 ## The step loop
@@ -103,9 +109,42 @@ harness.step(observation)
 # unknown model_id raises UnknownModelError (this is a port, not a marketplace)
 ```
 
-`BioSimRouter` is OpenRouter-**shaped**: one entry, a `model` / `model_id` field, unknown ids fail clearly. Optional `remote_url=` forwards that `model` field to an HTTP router **you** run later (`HttpModelBackend`). This repo does not ship a hosted marketplace.
+`BioSimRouter` is OpenRouter-**shaped**: one entry, a `model` / `model_id` field, unknown ids fail clearly. Optional `remote_url=` forwards that `model` field to an HTTP router (`HttpModelBackend`). This repo does not ship a hosted marketplace.
 
 You can also pass a backend positionally: `FlyHarness(backend, encoder, decoder)`.
+
+## Optional extra: local HTTP router process
+
+This is a **local port**, not OpenRouter-the-company. Already-deployed harness clients (`HttpModelBackend`, `DirectBioSimBackend(url=...)`, `BioSimRouter(remote_url=...)`) call it. Stdlib `http.server` only — no FastAPI, no billing, no cloud gateway. Bind address defaults to `127.0.0.1`.
+
+```bash
+pip install -e ".[router]"   # empty extra; core install is enough to run the CLI
+fly-harness-router
+# or
+python -m fly_harness.router --host 127.0.0.1 --port 8765
+```
+
+Endpoints (JSON; bodies/query include an OpenRouter-shaped `model` field):
+
+- `POST /tick` — `{"model": "...", "input": [...]}` → neural output
+- `POST /reset` — `{"model": "...", "potentials": null | [...]}`
+- `GET /status?model=...`
+
+Default in-process registry: the 24-neuron LIF **fixture** (`fly-harness.in-process-lif`) plus `FakeDeployedSim` ids (`fake.deployed`, `fake.deployed.gain`). Unknown `model` → HTTP 404 → harness `UnknownModelError`.
+
+```python
+from fly_harness import DirectBioSimBackend, FlyHarness
+
+backend = DirectBioSimBackend(
+    url="http://127.0.0.1:8765",
+    model_id="fake.deployed",
+    n_neurons=8,
+)
+harness = FlyHarness(encoder=encoder, decoder=decoder, backend=backend)
+harness.step(observation)
+```
+
+`FlyHarness.step(obs) -> action` is unchanged. This extra is not a 140k FlyWire runtime and does not download MaleCNS.
 
 ## Load a sparse connectome
 
@@ -232,7 +271,7 @@ An MCP host that calls `harness_step(touch_left, touch_right)` therefore steps t
 
 ## Tests
 
-GitHub Actions on `main` and pull requests runs `pip install -e ".[dev]"` then `pytest` — no FlyGym/MCP extras, no MuJoCo. Skip/mock tests in those extras still pass.
+GitHub Actions on `main` and pull requests runs `pip install -e ".[dev]"` then `pytest` — no FlyGym/MCP extras, no MuJoCo. Skip/mock tests in those extras still pass. The local HTTP router extra is stdlib-only, so its tests run in that same core CI.
 
 Default local suite does **not** need MuJoCo. The FlyGym smoke test skips unless `flygym` imports and a NeuroMechFly sim can start:
 
@@ -248,6 +287,14 @@ Model-backend docking (default LIF, fake deployed sim, router `model_id` switch,
 
 ```bash
 pytest tests/test_backend.py tests/test_harness.py
+```
+
+The optional local HTTP router starts a stdlib server and ticks through `HttpModelBackend` / `FlyHarness` (still no FastAPI, no extras required):
+
+```bash
+pytest tests/test_router.py
+# after install:
+fly-harness-router --help
 ```
 
 MCP tests mock FastMCP and do **not** start a live MCP client. They pass without `fly-harness[mcp]`. With the extra, a factory smoke checks FastMCP constructs (still no stdio client):
