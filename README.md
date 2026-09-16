@@ -337,6 +337,21 @@ python examples/mcp_flygym_loop.py --serve
 
 An MCP host that calls `harness_step(touch_left, touch_right)` therefore steps the harness and applies the decoded joint/adhesion command to the body.
 
+## Example: FlyGym body through biorouter to flybrain.malecns
+
+FlyGym obs → `FlyHarness.step` → local **biorouter** → listed model id `flybrain.malecns` → decode a FlyGym joint/adhesion action back onto the body. Wiring FlyGym / flybrain is **using** the harness, not a harness feature. Core stays model-agnostic.
+
+Default in-thread run: `StubFlyGymEnv` (no MuJoCo) + `FakeFlyBrain` (32 neurons) listed as `flybrain.malecns`. `--real` only if `fly-harness[flybrain]` and MaleCNS files are already on disk (never downloads). `--try-flygym` attempts a real NeuroMechFly sim and falls back to the stub. Missing / unknown model id → HTTP 404. Not Google-hosted, not 160k parameters, not consciousness.
+
+```bash
+python examples/body_loop.py
+python examples/body_loop.py --real
+python examples/body_loop.py --try-flygym
+# or, after install:
+python -m fly_harness.demo.body_loop
+fly-harness-body-loop-demo
+```
+
 ## Tests
 
 GitHub Actions on `main` and pull requests runs `pip install -e ".[dev]"` then `pytest` — no FlyGym/MCP/flybrain extras, no MuJoCo, **no MaleCNS download**. Skip/mock tests in those extras still pass. The **biorouter** extra is stdlib-only, so its tests run in that same core CI.
@@ -401,6 +416,13 @@ The composed MCP+FlyGym example is also mock/skip: no MuJoCo and no live MCP cli
 ```bash
 pytest tests/test_composed_example.py
 python examples/mcp_flygym_loop.py
+```
+
+The body-loop example is stub body + fake `flybrain.malecns` in-thread (no MuJoCo, no MaleCNS download). Real extras skip unless already present:
+
+```bash
+pytest tests/test_body_loop_example.py
+python examples/body_loop.py
 ```
 
 ## License
