@@ -52,7 +52,7 @@ def test_pyproject_has_no_c302_or_openworm_extra() -> None:
     assert "fly_harness.demo.biorouter_c302_loop:main" in text
     assert "c302 =" not in text
     assert "openworm =" not in text
-    assert 'version = "0.5.1"' in text
+    assert 'version = "0.5.2"' in text
 
 
 def test_inprocess_loop_lists_fake_c302() -> None:
