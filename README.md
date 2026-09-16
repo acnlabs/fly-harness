@@ -148,6 +148,20 @@ harness.step(observation)
 
 `FlyHarness.step(obs) -> action` is unchanged. This extra is not a 140k FlyWire runtime and does not download MaleCNS.
 
+## Example: biorouter through FlyHarness.step
+
+OpenRouter routes existing LLMs; **biorouter** routes existing deployed bio-sims. This example starts a **local** stdlib server (or attaches with `--url`), docks `HttpModelBackend` / `DirectBioSimBackend(url=...)`, and calls `FlyHarness.step`. It uses the 8-neuron `FakeDeployedSim` fixture — **not** FlyWire / MaleCNS, **not** a marketplace.
+
+```bash
+python examples/biorouter_loop.py
+# or, after install:
+python -m fly_harness.demo.biorouter_loop
+fly-harness-biorouter-demo
+# attach to a process you already started:
+biorouter --host 127.0.0.1 --port 8765
+python examples/biorouter_loop.py --url http://127.0.0.1:8765
+```
+
 ## Load a sparse connectome
 
 `load_connectome` maps global neuron ids (any integers) onto contiguous local indices and builds a CSR weight matrix of shape `(n_subset, n_subset)`.
@@ -298,6 +312,13 @@ pytest tests/test_router.py
 # after install:
 biorouter --help
 python -m fly_harness.router --help
+```
+
+The biorouter example is in-thread by default (no live `biorouter` daemon). Attaching to a real process is skip-gated on `BIOROUTER_URL`:
+
+```bash
+pytest tests/test_biorouter_example.py
+python examples/biorouter_loop.py
 ```
 
 MCP tests mock FastMCP and do **not** start a live MCP client. They pass without `fly-harness[mcp]`. With the extra, a factory smoke checks FastMCP constructs (still no stdio client):
