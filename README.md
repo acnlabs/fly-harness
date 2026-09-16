@@ -119,6 +119,17 @@ harness.step(observation)
 
 You can also pass a backend positionally: `FlyHarness(backend, encoder, decoder)`.
 
+## Docking your Model
+
+The harness does not dock a specific vendor. Implement `ModelBackend` (`tick` / `reset` /
+`n_neurons` / `model_id` / `timestamp`) and pass it to `FlyHarness.step`. To list that
+Model on local **biorouter**, register an OpenRouter-shaped `model` id. Direct dock and
+router dock are **usage**, not harness features.
+
+Short guide: [docs/docking.md](docs/docking.md). In-repo stand-in: `FakeDeployedSim`.
+Runnable HTTP path: `examples/biorouter_loop.py`. `flybrain.malecns` is **one listed
+model** (when extra + on-disk data exist), not “the harness docks flybrain”.
+
 ## biorouter
 
 OpenRouter routes existing LLMs. **biorouter** routes existing **deployed biological simulation models**. Same idea (`model` id), different substrate.
@@ -370,6 +381,12 @@ Model-backend docking (default LIF, fake deployed sim, router `model_id` switch,
 
 ```bash
 pytest tests/test_backend.py tests/test_harness.py
+```
+
+The third-party docking guide is markdown only (`docs/docking.md`). A content test checks the `ModelBackend` contract and biorouter listing notes without extras:
+
+```bash
+pytest tests/test_docking_guide.py
 ```
 
 The optional **biorouter** process starts a stdlib server and ticks through `HttpModelBackend` / `FlyHarness` (still no FastAPI, no extras required):
