@@ -1,11 +1,9 @@
-"""Optional flybrain Model extra: dock a running MaleCNS LIF sim.
+"""Adapter so **biorouter** / examples can talk to third-party ``flybrain``.
 
-Third-party package: https://pypi.org/project/flybrain/
-(https://github.com/alextitonis/fly.ai). Core stays numpy/scipy-only.
-
-This extra docks a **running** sim. Google/Janelia released a dump, not a
-hosted sim. Not the FlyWire website, not a consciousness/upload claim, and
-not ~160k "parameters" — MaleCNS v1.0 is **166,700 neurons**.
+Not a harness feature: the core stays a model-agnostic ``ModelBackend`` port.
+Google/Janelia released a dump, not a hosted sim. Not the FlyWire website,
+not a consciousness/upload claim, and not ~160k "parameters" — MaleCNS v1.0
+is **166,700 neurons**.
 """
 
 from fly_harness.flybrain.backend import (

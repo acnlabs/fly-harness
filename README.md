@@ -2,9 +2,9 @@
 
 **v0.5.0** — a sparse neural **harness**, not a fly-brain simulation.
 
-Formula: **Agent = deployed bio-sim Model + harness**. The harness docks to a
-**running** sim through a stable contract. FlyWire / MaleCNS files are weight
-dumps, not that contract.
+Formula: **Agent = Model + harness**. The harness docks to a **running** sim
+through a stable contract (`ModelBackend` only). FlyWire / MaleCNS files are
+weight dumps, not that contract. The harness does not dock a specific model.
 
 The public contract is:
 
@@ -19,7 +19,7 @@ The 24-neuron touch-reflex loop is a **test/demo fixture**. It is not the model,
 ## What this is not
 
 - **Not** a 140k-neuron FlyWire connectome, upload, or dense 140k×140k matrix
-- **Not** an arbitrary-scale whole-brain runtime in the **core** (memory is bounded by the loaded subset). Optional `fly-harness[flybrain]` docks a third-party MaleCNS LIF (**166,700 neurons**, not 160k "parameters") — a dump you run locally, not a Google-hosted sim or the FlyWire website
+- **Not** an arbitrary-scale whole-brain runtime in the **core** (memory is bounded by the loaded subset). Third-party Models such as [`flybrain`](https://pypi.org/project/flybrain/) (MaleCNS v1.0, **166,700 neurons**, not 160k "parameters") attach through `ModelBackend` — **using** the harness, not a harness feature. A dump you run locally, not a Google-hosted sim or the FlyWire website
 - **Not** `caveclient` or a built-in biomechanics engine — FlyGym/NeuroMechFly is an **optional body extra**, not the core product
 - **Not** an MCP microkernel or FastAPI service — MCP is an **optional protocol extra**, not the core product
 - **Not** OpenRouter-the-company, a marketplace, billing system, hosted cloud gateway, or public bio-sim catalog — `BioSimRouter` is a harness-side **port**; **biorouter** is an optional **local** HTTP process (stdlib, `127.0.0.1` by default)
@@ -51,7 +51,7 @@ pip install -e ".[mcp]"
 pip install -e ".[biorouter]"
 ```
 
-**flybrain** is optional (third-party MaleCNS LIF). Core still does not import it. Default tests **do not** download `~/fly-data`:
+**flybrain** is optional. The extra is an adapter so **biorouter** can list `flybrain.malecns` and the example can use that third-party Model. The harness does not dock a specific model. Core stays model-agnostic and does not import flybrain. Default tests **do not** download `~/fly-data`:
 
 ```bash
 pip install -e ".[flybrain]"
@@ -138,7 +138,7 @@ Endpoints (JSON; bodies/query include an OpenRouter-shaped `model` field):
 - `POST /reset` — `{"model": "...", "potentials": null | [...]}`
 - `GET /status?model=...`
 
-Default in-process registry: the 24-neuron LIF **fixture** (`fly-harness.in-process-lif`) plus `FakeDeployedSim` ids (`fake.deployed`, `fake.deployed.gain`). Unknown `model` → HTTP 404 → harness `UnknownModelError`.
+Default in-process registry: the 24-neuron LIF **fixture** (`fly-harness.in-process-lif`) plus `FakeDeployedSim` ids (`fake.deployed`, `fake.deployed.gain`). If `fly-harness[flybrain]` is installed **and** MaleCNS files are already on disk, biorouter also lists `flybrain.malecns` (OpenRouter-shaped provider id). Unknown / missing flybrain → HTTP 404 / skip. Never downloads MaleCNS.
 
 ```python
 from fly_harness import DirectBioSimBackend, FlyHarness
@@ -154,9 +154,9 @@ harness.step(observation)
 
 `FlyHarness.step(obs) -> action` is unchanged. This extra is not a 140k FlyWire runtime and does not download MaleCNS.
 
-## Optional extra: flybrain (first real Model)
+## Example: FlyHarness.step with a third-party flybrain Model
 
-Formula: **Agent = deployed bio-sim Model + harness**. [`flybrain`](https://pypi.org/project/flybrain/) ([source](https://github.com/alextitonis/fly.ai)) is a third-party leaky integrate-and-fire sim over **MaleCNS v1.0** (**166,700 neurons**, 25.6M connections). Google/Janelia released a **dump**, not a hosted sim. This extra wraps a **running** `FlyBrain` as `FlyBrainBackend` (`tick` / `reset` / `n_neurons` / `model_id`) and keeps `FlyHarness.step(obs) -> action`. It does **not** rewrite flybrain, does **not** use `caveclient`, and is **not** a consciousness or upload claim. It is **not** ~160k "parameters".
+Formula: **Agent = Model + harness**. [`flybrain`](https://pypi.org/project/flybrain/) ([source](https://github.com/alextitonis/fly.ai)) is a **third-party Model** (MaleCNS v1.0 LIF, **166,700 neurons**, 25.6M connections). Google/Janelia released a dump, not a hosted sim. Wiring it is **using** the harness (`ModelBackend`), not a harness feature — the core stays model-agnostic. An optional extra holds the adapter so **biorouter** can list `flybrain.malecns` and this example can run. Not Google-hosted, not 160k parameters, not consciousness.
 
 ```python
 from fly_harness import FlyHarness
@@ -358,10 +358,10 @@ pytest tests/test_biorouter_example.py
 python examples/biorouter_loop.py
 ```
 
-flybrain adapter tests use `FakeFlyBrain` and pass without the extra. Smoke runs only if `flybrain` imports **and** `~/fly-data` already has files (otherwise skip; CI does not download):
+Router tests can register a **fake flybrain-shaped** backend under `flybrain.malecns` (no extra, no download). Default CI without flybrain/data omits that id (HTTP 404). Real flybrain smoke skips unless the extra is installed **and** `~/fly-data` already has files (CI does not download):
 
 ```bash
-pytest tests/test_flybrain_adapter.py
+pytest tests/test_router.py tests/test_flybrain_adapter.py
 python examples/flybrain_loop.py
 # optional, only with extra + on-disk MaleCNS:
 # python examples/flybrain_loop.py --real

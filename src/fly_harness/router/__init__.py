@@ -10,8 +10,10 @@ from fly_harness.router.registry import (
     DEFAULT_FAKE_GAIN_MODEL_ID,
     DEFAULT_FAKE_MODEL_ID,
     DEFAULT_FAKE_N_NEURONS,
+    FLYBRAIN_MODEL_ID,
     create_default_backends,
     create_registry,
+    try_register_flybrain,
 )
 from fly_harness.router.server import (
     DEFAULT_HOST,
@@ -29,6 +31,7 @@ __all__ = [
     "DEFAULT_FAKE_N_NEURONS",
     "DEFAULT_HOST",
     "DEFAULT_PORT",
+    "FLYBRAIN_MODEL_ID",
     "RouterHTTPServer",
     "create_default_backends",
     "create_registry",
@@ -36,4 +39,5 @@ __all__ = [
     "make_server",
     "running_router",
     "serve",
+    "try_register_flybrain",
 ]

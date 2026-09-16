@@ -26,8 +26,9 @@ def require_flybrain() -> None:
     if flybrain_available():
         return
     raise ImportError(
-        "flybrain is an optional Model extra, not part of the fly-harness kernel. "
-        "Install with: pip install 'fly-harness[flybrain]'. "
-        "This extra docks a running third-party sim; it does not download MaleCNS "
-        "unless you run `flybrain download` yourself."
+        "flybrain is a third-party Model, not part of the fly-harness kernel. "
+        "The harness does not dock a specific model. Install with: "
+        "pip install 'fly-harness[flybrain]' to use it from the example or so "
+        "biorouter can list model id 'flybrain.malecns'. "
+        "This extra will not download MaleCNS; run `flybrain download` yourself."
     )

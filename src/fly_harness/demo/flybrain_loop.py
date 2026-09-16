@@ -1,8 +1,9 @@
-"""Example: FlyHarness.step docked to a flybrain ModelBackend.
+"""Example: FlyHarness.step with a third-party flybrain Model.
 
-Default run uses FakeFlyBrain (32 neurons, no download). Pass ``--real`` only
-when ``flybrain`` is installed **and** MaleCNS files are already in ~/fly-data;
-this script will not download them.
+Wiring flybrain is using the harness, not a harness feature. Default run uses
+FakeFlyBrain (32 neurons, no download). Pass ``--real`` only when ``flybrain``
+is installed **and** MaleCNS files are already in ~/fly-data; this script will
+not download them. biorouter lists ``flybrain.malecns`` when extra + data exist.
 
     python examples/flybrain_loop.py
     python examples/flybrain_loop.py --real
@@ -28,10 +29,12 @@ from fly_harness.flybrain import (
 from fly_harness.harness import FlyHarness
 
 _BANNER = (
-    "flybrain extra: first real Model case. Agent = deployed bio-sim Model + harness. "
-    "Docks third-party flybrain LIF over MaleCNS v1.0 (166,700 neurons, not 160k "
-    "parameters). Not Google-hosted, not the FlyWire website, not a consciousness "
-    "or upload claim. Default loop is a FakeFlyBrain stub (no ~/fly-data download)."
+    "Example: FlyHarness.step with a third-party flybrain Model. "
+    "Agent = Model + harness. flybrain is a third-party LIF over MaleCNS v1.0 "
+    "(166,700 neurons, not 160k parameters). Wiring it is using the harness, "
+    "not a harness feature. Not Google-hosted, not the FlyWire website, not a "
+    "consciousness or upload claim. Default loop is a FakeFlyBrain stub "
+    "(no ~/fly-data download). biorouter lists flybrain.malecns when extra + data exist."
 )
 
 
@@ -105,7 +108,7 @@ def main(argv: list[str] | None = None) -> None:
         f"malecns_ref={MALECNS_N_NEURONS} stub={isinstance(backend.brain, FakeFlyBrain)}"
     )
     if harness.n_neurons == MALECNS_N_NEURONS:
-        print("docked real MaleCNS-sized sim (dump on disk, not a hosted Google/FlyWire service)")
+        print("using real MaleCNS-sized third-party Model (dump on disk, not a hosted Google/FlyWire service)")
     traces = run_scripted_loop(harness, steps=args.steps)
     for row in traces:
         print(

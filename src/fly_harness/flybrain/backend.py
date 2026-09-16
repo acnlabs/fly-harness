@@ -13,7 +13,7 @@ import numpy as np
 
 from fly_harness.flybrain.detect import require_flybrain
 
-DEFAULT_MODEL_ID = "flybrain.malecns-v1"
+DEFAULT_MODEL_ID = "flybrain.malecns"
 MALECNS_N_NEURONS = 166_700
 
 
@@ -39,7 +39,10 @@ def _as_numpy(array: Any) -> np.ndarray:
 
 
 class FlyBrainBackend:
-    """Dock a running ``FlyBrain`` (or duck-typed fake) as a ``ModelBackend``.
+    """Wrap a running ``FlyBrain`` (or duck-typed fake) as a ``ModelBackend``.
+
+    Used by the example and by biorouter's optional ``flybrain.malecns``
+    listing. Not a harness feature: the core stays a model-agnostic port.
 
     ``tick`` turns a length-``n_neurons`` encoded current into
     ``FlyBrain.step(inject=...)`` and returns membrane voltages. This is a

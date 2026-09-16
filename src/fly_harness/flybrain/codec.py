@@ -1,4 +1,4 @@
-"""Encoder/Decoder for docking FlyBrain through FlyHarness.step.
+"""Encoder/Decoder for using FlyBrain through FlyHarness.step.
 
 Maps a small inject/readout observation onto a length-``n_neurons`` current
 vector. Does not load MaleCNS and does not rewrite flybrain.

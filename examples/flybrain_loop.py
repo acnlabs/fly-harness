@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Runnable example: FlyHarness.step docked to flybrain (FakeFlyBrain by default).
+"""Runnable example: FlyHarness.step with a third-party flybrain Model (FakeFlyBrain by default).
 
-Does not download MaleCNS. Use --real only when files are already in ~/fly-data.
+Wiring flybrain is using the harness, not a harness feature. Does not download
+MaleCNS. Use --real only when files are already in ~/fly-data.
 
     python examples/flybrain_loop.py
     python examples/flybrain_loop.py --real

@@ -36,12 +36,17 @@ def _core_sources() -> list[Path]:
 
 
 def test_kernel_sources_do_not_import_flybrain() -> None:
+    import fly_harness
+
+    assert "FlyBrainBackend" not in fly_harness.__all__
+    assert not hasattr(fly_harness, "FlyBrainBackend")
     for path in _core_sources():
         text = path.read_text(encoding="utf-8")
         assert "from flybrain" not in text
         assert "import flybrain" not in text
         assert "fly_harness.flybrain" not in text
         assert "caveclient" not in text
+        assert "FlyBrainBackend" not in text
 
 
 def test_extension_imports_without_third_party_flybrain() -> None:
@@ -118,7 +123,9 @@ def test_example_main_uses_stub(capsys: pytest.CaptureFixture[str]) -> None:
     assert "166,700" in out or "166,700" in _BANNER
     assert "FakeFlyBrain" in out or "stub=True" in out
     assert "160k" in _BANNER
-    assert DEFAULT_MODEL_ID.startswith("flybrain")
+    assert "not a harness feature" in _BANNER
+    assert "first real Model" not in _BANNER
+    assert DEFAULT_MODEL_ID == "flybrain.malecns"
 
 
 @pytest.mark.skipif(

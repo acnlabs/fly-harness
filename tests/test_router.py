@@ -21,8 +21,11 @@ from fly_harness.router import (
     DEFAULT_FAKE_MODEL_ID,
     DEFAULT_FAKE_N_NEURONS,
     DEFAULT_HOST,
+    FLYBRAIN_MODEL_ID,
+    create_default_backends,
     create_registry,
     running_router,
+    try_register_flybrain,
 )
 from fly_harness.router.server import build_arg_parser
 
@@ -171,3 +174,57 @@ def test_unknown_model_id_is_404_and_unknown_model_error() -> None:
         assert isinstance(forwarded, HttpModelBackend)
         with pytest.raises(UnknownModelError):
             forwarded.tick(np.zeros(8))
+
+
+def test_default_registry_omits_flybrain_malecns_without_extra_or_data() -> None:
+    from fly_harness.flybrain.detect import flybrain_available, flybrain_data_available
+
+    backends = create_default_backends()
+    present = flybrain_available() and flybrain_data_available()
+    assert (FLYBRAIN_MODEL_ID in backends) is present
+    if not present:
+        assert try_register_flybrain({}) is False
+
+
+def test_unlisted_flybrain_malecns_is_404() -> None:
+    from fly_harness.backend import FakeDeployedSim
+
+    registry = create_registry(
+        {
+            DEFAULT_FAKE_MODEL_ID: FakeDeployedSim(
+                DEFAULT_FAKE_N_NEURONS, model_id=DEFAULT_FAKE_MODEL_ID
+            )
+        }
+    )
+    assert FLYBRAIN_MODEL_ID not in registry.registered_ids()
+    with running_router(registry=registry) as (url, _server):
+        client = HttpModelBackend(url, model_id=FLYBRAIN_MODEL_ID, n_neurons=8)
+        with pytest.raises(UnknownModelError, match="flybrain.malecns"):
+            client.tick(np.zeros(8))
+        status_client = HttpModelBackend(url, model_id=FLYBRAIN_MODEL_ID)
+        with pytest.raises(UnknownModelError, match="flybrain.malecns"):
+            _ = status_client.n_neurons
+
+
+def test_router_ticks_fake_flybrain_shaped_backend() -> None:
+    from fly_harness.flybrain import FAKE_N_NEURONS, FakeFlyBrain, FlyBrainBackend
+
+    fake = FlyBrainBackend(FakeFlyBrain(), model_id=FLYBRAIN_MODEL_ID)
+    registry = create_registry({FLYBRAIN_MODEL_ID: fake})
+    with running_router(registry=registry) as (url, _server):
+        client = HttpModelBackend(
+            url, model_id=FLYBRAIN_MODEL_ID, n_neurons=FAKE_N_NEURONS
+        )
+        current = np.zeros(FAKE_N_NEURONS, dtype=np.float64)
+        current[0] = 1.5
+        out = client.tick(current)
+        assert out.shape == (FAKE_N_NEURONS,)
+        assert client.model_id == FLYBRAIN_MODEL_ID
+        harness = FlyHarness(
+            encoder=VectorEncoder(),
+            decoder=VectorDecoder(),
+            backend=client,
+        )
+        result = harness.step(current)
+        assert result.potentials.shape == (FAKE_N_NEURONS,)
+        assert harness.model_id == FLYBRAIN_MODEL_ID
