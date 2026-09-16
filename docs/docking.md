@@ -9,6 +9,11 @@ claim.
 `flybrain.malecns` is **one listed model** on local biorouter when that extra and
 on-disk data are present. It is not “the harness docks flybrain”.
 
+Switching species is the same port: **deploy a sim + list an id**. `c302.celegans`
+is one listed worm Model. Default CI registers `FakeC302` (**302** hermaphrodite
+neurons) so the id exists without NEURON / Docker / OpenWorm. Worm is **usage**,
+not a harness feature, not a fly-harness extra, not `fly-harness[c302]`, not a hosted OpenWorm API.
+
 ## 1. Implement `ModelBackend`
 
 Structural typing (`typing.Protocol`). You do not subclass a framework. Required surface:
@@ -107,7 +112,7 @@ Register your backend under a `model` id and serve that registry. Unknown ids ar
 from fly_harness.router.registry import create_default_backends, create_registry
 from fly_harness.router.server import serve
 
-backends = create_default_backends()  # fixtures; optional flybrain.malecns if extra+data exist
+backends = create_default_backends()  # fixtures + FakeC302 as c302.celegans; optional flybrain.malecns if extra+data exist
 backends["vendor.sim"] = VendorSim(8, model_id="vendor.sim")
 serve(registry=create_registry(backends))  # POST /tick {"model": "vendor.sim", "input": [...]}
 ```
@@ -116,9 +121,11 @@ The `biorouter` CLI uses the default registry only. Listing a third-party sim is
 **process code** (as above), not a plugin marketplace. Clients keep calling
 `HttpModelBackend` / `DirectBioSimBackend(url=...)` / `BioSimRouter(remote_url=...)`.
 
-Default CLI ids: `fly-harness.in-process-lif`, `fake.deployed`, `fake.deployed.gain`.
-`flybrain.malecns` is listed only when `fly-harness[flybrain]` **and** MaleCNS files are
-already on disk. Missing extra or data → omit / 404. This extra will not download MaleCNS.
+Default CLI ids: `fly-harness.in-process-lif`, `fake.deployed`, `fake.deployed.gain`,
+and `c302.celegans` (`FakeC302`, 302 hermaphrodite neurons). `flybrain.malecns` is
+listed only when `fly-harness[flybrain]` **and** MaleCNS files are already on disk.
+Missing extra or data → omit / 404. This extra will not download MaleCNS. Worm
+listing will not download connectomes and will not start OpenWorm Docker.
 
 ## Existing examples
 
@@ -129,6 +136,7 @@ Do not treat these as a second Model or a flybrain product surface. They show th
 | `tests/test_backend.py` | `FakeDeployedSim` / `DirectBioSimBackend` / `BioSimRouter` through `FlyHarness.step` |
 | `examples/biorouter_loop.py` | Local HTTP → fixture ids (`fake.deployed`) |
 | `examples/biorouter_flybrain_loop.py` | Same HTTP path; `flybrain.malecns` as **one listed** id (fake in CI) |
+| `examples/biorouter_c302_loop.py` | Same HTTP path; `c302.celegans` as **one listed** id (`FakeC302`, 302 neurons) |
 | `examples/flybrain_loop.py` | Using a third-party Model directly (not a harness feature) |
 | `examples/body_loop.py` | FlyGym-shaped obs through the same port to a listed id |
 
@@ -138,4 +146,5 @@ Do not treat these as a second Model or a flybrain product surface. They show th
 - Not Google-hosted, not the FlyWire website, not ~160k “parameters”
 - Not caveclient, not a biomechanics engine (FlyGym is an optional extra)
 - Not FastAPI, not a public catalog
+- Not `fly-harness[c302]` / OpenWorm-in-the-cloud / a hosted OpenWorm API
 - Not a consciousness or upload claim

@@ -17,6 +17,7 @@ from fly_harness import (
 )
 from fly_harness.backend import DEFAULT_LIF_MODEL_ID
 from fly_harness.router import (
+    C302_MODEL_ID,
     DEFAULT_FAKE_GAIN_MODEL_ID,
     DEFAULT_FAKE_MODEL_ID,
     DEFAULT_FAKE_N_NEURONS,
@@ -25,7 +26,9 @@ from fly_harness.router import (
     create_default_backends,
     create_registry,
     running_router,
+    try_register_c302,
     try_register_flybrain,
+    try_register_real_c302,
 )
 from fly_harness.router.server import build_arg_parser
 
@@ -57,9 +60,13 @@ def test_kernel_sources_do_not_import_router_or_fastapi() -> None:
     for path in _core_sources():
         text = path.read_text(encoding="utf-8")
         assert "fly_harness.router" not in text
+        assert "fly_harness.c302" not in text
         assert "fastapi" not in text.lower()
         assert "from fastapi" not in text
         assert "http.server" not in text
+        assert "from c302" not in text
+        assert "import c302" not in text
+        assert "openworm" not in text.lower()
 
 
 def test_default_registry_has_lif_and_fake_ids() -> None:
@@ -68,8 +75,11 @@ def test_default_registry_has_lif_and_fake_ids() -> None:
     assert DEFAULT_LIF_MODEL_ID in ids
     assert DEFAULT_FAKE_MODEL_ID in ids
     assert DEFAULT_FAKE_GAIN_MODEL_ID in ids
+    assert C302_MODEL_ID in ids
     assert registry.select(DEFAULT_LIF_MODEL_ID).n_neurons == 24
     assert registry.select(DEFAULT_FAKE_MODEL_ID).n_neurons == DEFAULT_FAKE_N_NEURONS
+    assert registry.select(C302_MODEL_ID).n_neurons == 302
+    assert registry.select(C302_MODEL_ID).model_id == "c302.celegans"
 
 
 def test_cli_defaults_bind_localhost() -> None:
@@ -82,6 +92,8 @@ def test_cli_defaults_bind_localhost() -> None:
     assert "fly-harness-router" not in help_text
     assert "usage: biorouter" in help_text
     assert "deployed biological simulation models" in (parser.description or "")
+    assert "c302.celegans" in (parser.description or "")
+    assert "FakeC302" in (parser.description or "")
 
 
 def test_pyproject_exposes_biorouter_cli_and_extra() -> None:
@@ -91,6 +103,10 @@ def test_pyproject_exposes_biorouter_cli_and_extra() -> None:
     assert "fly-harness-router" not in text
     assert 'biorouter = "fly_harness.router.server:main"' in text
     assert "biorouter = []" in text
+    assert "c302 =" not in text
+    assert "openworm =" not in text
+    assert "[c302]" not in text
+    assert "[openworm]" not in text
 
 
 def test_http_client_ticks_fake_through_local_router() -> None:
@@ -204,6 +220,54 @@ def test_unlisted_flybrain_malecns_is_404() -> None:
         status_client = HttpModelBackend(url, model_id=FLYBRAIN_MODEL_ID)
         with pytest.raises(UnknownModelError, match="flybrain.malecns"):
             _ = status_client.n_neurons
+
+
+def test_default_registry_lists_fake_c302_without_openworm() -> None:
+    from fly_harness.c302 import FakeC302, running_c302_backend
+    from fly_harness.protocols import ModelBackend
+
+    backends = create_default_backends()
+    assert C302_MODEL_ID in backends
+    worm = backends[C302_MODEL_ID]
+    assert worm.n_neurons == 302
+    assert worm.model_id == "c302.celegans"
+    assert isinstance(worm, FakeC302)
+    assert isinstance(worm, ModelBackend)
+    assert try_register_c302({}) is True
+    assert try_register_real_c302({}) is (running_c302_backend() is not None)
+    assert running_c302_backend() is None
+
+
+def test_router_lists_fake_flybrain_and_fake_c302() -> None:
+    from fly_harness.c302 import C302_N_NEURONS
+    from fly_harness.flybrain import FAKE_N_NEURONS, FakeFlyBrain, FlyBrainBackend
+
+    backends = create_default_backends()
+    backends[FLYBRAIN_MODEL_ID] = FlyBrainBackend(
+        FakeFlyBrain(), model_id=FLYBRAIN_MODEL_ID
+    )
+    registry = create_registry(backends)
+    ids = registry.registered_ids()
+    assert FLYBRAIN_MODEL_ID in ids
+    assert C302_MODEL_ID in ids
+    with running_router(registry=registry) as (url, _server):
+        fly = HttpModelBackend(
+            url, model_id=FLYBRAIN_MODEL_ID, n_neurons=FAKE_N_NEURONS
+        )
+        worm = HttpModelBackend(
+            url, model_id=C302_MODEL_ID, n_neurons=C302_N_NEURONS
+        )
+        assert fly.tick(np.zeros(FAKE_N_NEURONS)).shape == (FAKE_N_NEURONS,)
+        current = np.zeros(C302_N_NEURONS, dtype=np.float64)
+        current[0] = 1.25
+        out = worm.tick(current)
+        assert out.shape == (C302_N_NEURONS,)
+        np.testing.assert_allclose(out[0], 1.25)
+        assert fly.model_id == "flybrain.malecns"
+        assert worm.model_id == "c302.celegans"
+        missing = HttpModelBackend(url, model_id="ghost.sim", n_neurons=8)
+        with pytest.raises(UnknownModelError, match="ghost.sim"):
+            missing.tick(np.zeros(8))
 
 
 def test_router_ticks_fake_flybrain_shaped_backend() -> None:

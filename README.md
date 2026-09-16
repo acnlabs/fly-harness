@@ -23,6 +23,7 @@ The 24-neuron touch-reflex loop is a **test/demo fixture**. It is not the model,
 - **Not** `caveclient` or a built-in biomechanics engine — FlyGym/NeuroMechFly is an **optional body extra**, not the core product
 - **Not** an MCP microkernel or FastAPI service — MCP is an **optional protocol extra**, not the core product
 - **Not** OpenRouter-the-company, a marketplace, billing system, hosted cloud gateway, or public bio-sim catalog — `BioSimRouter` is a harness-side **port**; **biorouter** is an optional **local** HTTP process (stdlib, `127.0.0.1` by default)
+- **Not** a hosted OpenWorm / c302 API, not `fly-harness[c302]` / `fly-harness[openworm]`, and **not** a new whole-brain PyPI package. Listing `c302.celegans` is usage (deploy a sim + list an id). Default CI uses `FakeC302` (**302** hermaphrodite neurons), not OpenWorm Docker
 - **Not** a consciousness/upload claim
 
 ## Install
@@ -129,6 +130,9 @@ router dock are **usage**, not harness features.
 Short guide: [docs/docking.md](docs/docking.md). In-repo stand-in: `FakeDeployedSim`.
 Runnable HTTP path: `examples/biorouter_loop.py`. `flybrain.malecns` is **one listed
 model** (when extra + on-disk data exist), not “the harness docks flybrain”.
+Switching species is the same port: deploy a running sim and list an id.
+`c302.celegans` is **one listed** worm Model (default CI: `FakeC302`, **302**
+hermaphrodite neurons) — usage, not a harness extra, not a hosted OpenWorm API.
 
 ## biorouter
 
@@ -149,7 +153,7 @@ Endpoints (JSON; bodies/query include an OpenRouter-shaped `model` field):
 - `POST /reset` — `{"model": "...", "potentials": null | [...]}`
 - `GET /status?model=...`
 
-Default in-process registry: the 24-neuron LIF **fixture** (`fly-harness.in-process-lif`) plus `FakeDeployedSim` ids (`fake.deployed`, `fake.deployed.gain`). If `fly-harness[flybrain]` is installed **and** MaleCNS files are already on disk, biorouter also lists `flybrain.malecns` (OpenRouter-shaped provider id). Unknown / missing flybrain → HTTP 404 / skip. Never downloads MaleCNS.
+Default in-process registry: the 24-neuron LIF **fixture** (`fly-harness.in-process-lif`), `FakeDeployedSim` ids (`fake.deployed`, `fake.deployed.gain`), and `c302.celegans` (`FakeC302`, **302** hermaphrodite neurons — a listed Model, not a fly-harness extra, not OpenWorm Docker). If `fly-harness[flybrain]` is installed **and** MaleCNS files are already on disk, biorouter also lists `flybrain.malecns` (OpenRouter-shaped provider id). Unknown / missing flybrain → HTTP 404 / skip. Never downloads MaleCNS. Never starts OpenWorm Docker.
 
 ```python
 from fly_harness import DirectBioSimBackend, FlyHarness
@@ -223,6 +227,23 @@ fly-harness-biorouter-flybrain-demo
 # attach to a process you already started (404 if that process did not list the id):
 biorouter --host 127.0.0.1 --port 8765
 python examples/biorouter_flybrain_loop.py --url http://127.0.0.1:8765
+```
+
+## Example: biorouter routes c302.celegans through FlyHarness.step
+
+Switching species is **usage**, not a harness feature: deploy a running sim + list an OpenRouter-shaped id. **biorouter** lists `c302.celegans` the same way it lists `flybrain.malecns`. There is **no** `fly-harness[c302]` / `fly-harness[openworm]` extra (extra glue is only for a third-party API that is not already `ModelBackend`; that path was rejected for worm). Not a new whole-brain PyPI package, not a hosted OpenWorm API.
+
+Default in-thread run uses `FakeC302` (**302** hermaphrodite neurons) so CI stays green without NEURON / Docker / OpenWorm. `--real` only if third-party `c302` is already importable **and** a tick/reset Model is already running (never downloads connectomes, never starts OpenWorm Docker). Missing / unknown id → HTTP 404 / `UnknownModelError`. Not consciousness.
+
+```bash
+python examples/biorouter_c302_loop.py
+python examples/biorouter_c302_loop.py --real
+# or, after install:
+python -m fly_harness.demo.biorouter_c302_loop
+fly-harness-biorouter-c302-demo
+# attach to a process you already started (404 if that process did not list the id):
+biorouter --host 127.0.0.1 --port 8765
+python examples/biorouter_c302_loop.py --url http://127.0.0.1:8765
 ```
 
 ## Load a sparse connectome
@@ -365,7 +386,7 @@ fly-harness-body-loop-demo
 
 ## Tests
 
-GitHub Actions on `main` and pull requests runs `pip install -e ".[dev]"` then `pytest` — no FlyGym/MCP/flybrain extras, no MuJoCo, **no MaleCNS download**. Skip/mock tests in those extras still pass. The **biorouter** extra is stdlib-only, so its tests run in that same core CI.
+GitHub Actions on `main` and pull requests runs `pip install -e ".[dev]"` then `pytest` — no FlyGym/MCP/flybrain extras, no MuJoCo, **no MaleCNS download**, **no OpenWorm Docker**. Skip/mock tests in those extras still pass. The **biorouter** extra is stdlib-only, so its tests run in that same core CI.
 
 Default local suite does **not** need MuJoCo. The FlyGym smoke test skips unless `flygym` imports and a NeuroMechFly sim can start:
 
@@ -419,6 +440,13 @@ The biorouter → `flybrain.malecns` example is in-thread by default (fake 32-ne
 ```bash
 pytest tests/test_biorouter_flybrain_example.py
 python examples/biorouter_flybrain_loop.py
+```
+
+Default CI also lists `c302.celegans` as `FakeC302` (302 neurons) so tests can select two model ids (`flybrain.malecns` fake + `c302.celegans` fake) without NEURON / Docker / OpenWorm. Real c302 skips unless a running tick/reset Model is already importable (never downloads, never starts OpenWorm Docker):
+
+```bash
+pytest tests/test_biorouter_c302_example.py tests/test_router.py
+python examples/biorouter_c302_loop.py
 ```
 
 MCP tests mock FastMCP and do **not** start a live MCP client. They pass without `fly-harness[mcp]`. With the extra, a factory smoke checks FastMCP constructs (still no stdio client):

@@ -7,13 +7,16 @@ harness, not FlyWire dumps, not a marketplace.
 """
 
 from fly_harness.router.registry import (
+    C302_MODEL_ID,
     DEFAULT_FAKE_GAIN_MODEL_ID,
     DEFAULT_FAKE_MODEL_ID,
     DEFAULT_FAKE_N_NEURONS,
     FLYBRAIN_MODEL_ID,
     create_default_backends,
     create_registry,
+    try_register_c302,
     try_register_flybrain,
+    try_register_real_c302,
 )
 from fly_harness.router.server import (
     DEFAULT_HOST,
@@ -26,6 +29,7 @@ from fly_harness.router.server import (
 )
 
 __all__ = [
+    "C302_MODEL_ID",
     "DEFAULT_FAKE_GAIN_MODEL_ID",
     "DEFAULT_FAKE_MODEL_ID",
     "DEFAULT_FAKE_N_NEURONS",
@@ -39,5 +43,7 @@ __all__ = [
     "make_server",
     "running_router",
     "serve",
+    "try_register_c302",
     "try_register_flybrain",
+    "try_register_real_c302",
 ]

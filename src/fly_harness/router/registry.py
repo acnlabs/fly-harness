@@ -1,9 +1,11 @@
 """In-process ModelBackend registry for the optional biorouter process.
 
-Default ids: the 24-neuron in-process LIF fixture plus FakeDeployedSim
-stand-ins. If the third-party flybrain extra and on-disk MaleCNS files are
-present, ``flybrain.malecns`` is listed like an OpenRouter provider id.
-Missing flybrain → omit (HTTP 404). Never downloads MaleCNS. Not a marketplace.
+Default ids: the 24-neuron in-process LIF fixture, FakeDeployedSim
+stand-ins, and FakeC302 listed as ``c302.celegans`` (302 hermaphrodite
+neurons, no OpenWorm). If the third-party flybrain extra and on-disk
+MaleCNS files are present, ``flybrain.malecns`` is listed like an
+OpenRouter provider id. Missing flybrain → omit (HTTP 404). Never
+downloads MaleCNS. Never starts OpenWorm Docker. Not a marketplace.
 """
 
 from __future__ import annotations
@@ -16,6 +18,7 @@ from fly_harness.backend import (
     FakeDeployedSim,
     InProcessLifBackend,
 )
+from fly_harness.c302 import C302_MODEL_ID, FakeC302
 from fly_harness.protocols import ModelBackend
 
 DEFAULT_FAKE_MODEL_ID = "fake.deployed"
@@ -47,8 +50,42 @@ def try_register_flybrain(backends: dict[str, ModelBackend]) -> bool:
     return True
 
 
+def try_register_c302(backends: dict[str, ModelBackend], *, real: bool = False) -> bool:
+    """List ``c302.celegans`` when a backend is registered.
+
+    Default (``real=False``): FakeC302 (302 neurons) so CI can prove the id
+    without NEURON / Docker / OpenWorm. ``real=True`` only if a running
+    tick/reset Model is already in the environment. This repo does not wrap
+    NeuroML/NEURON, does not download connectomes, and does not start
+    OpenWorm Docker. Failures skip so biorouter still serves fixtures.
+    """
+    if real:
+        return try_register_real_c302(backends)
+    try:
+        backends[C302_MODEL_ID] = FakeC302(model_id=C302_MODEL_ID)
+        return True
+    except Exception:
+        return False
+
+
+def try_register_real_c302(backends: dict[str, ModelBackend]) -> bool:
+    """Register a real worm Model only if one is already running. Never Docker."""
+    try:
+        from fly_harness.c302.detect import running_c302_backend
+    except Exception:
+        return False
+    backend = running_c302_backend()
+    if backend is None:
+        return False
+    try:
+        backends[getattr(backend, "model_id", C302_MODEL_ID)] = backend
+    except Exception:
+        return False
+    return True
+
+
 def create_default_backends() -> dict[str, ModelBackend]:
-    """LIF reflex fixture + FakeDeployedSim ids; optional flybrain provider."""
+    """LIF reflex fixture + FakeDeployedSim ids + FakeC302; optional flybrain."""
     from fly_harness.demo.connectome import SENSORY_INDICES, build_reflex_connectome
 
     lif = InProcessLifBackend(
@@ -71,6 +108,7 @@ def create_default_backends() -> dict[str, ModelBackend]:
         fake.model_id: fake,
         fake_gain.model_id: fake_gain,
     }
+    try_register_c302(backends)
     try_register_flybrain(backends)
     return backends
 

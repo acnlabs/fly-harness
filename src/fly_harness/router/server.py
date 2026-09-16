@@ -198,10 +198,14 @@ def build_arg_parser() -> argparse.ArgumentParser:
             "OpenRouter routes existing LLMs; biorouter routes existing "
             "deployed biological simulation models. Same idea (model id), "
             "different substrate. Local stdlib HTTP process (POST /tick, "
-            "POST /reset, GET /status). Lists flybrain.malecns when "
-            "fly-harness[flybrain] and MaleCNS files are already on disk "
-            "(otherwise omit / HTTP 404; never downloads). Not the harness, "
-            "not FlyWire dumps, not a marketplace. Binds 127.0.0.1 by default."
+            "POST /reset, GET /status). Lists c302.celegans when a backend "
+            "is registered (default CI: FakeC302, 302 hermaphrodite neurons; "
+            "not a fly-harness extra, not OpenWorm Docker). Lists "
+            "flybrain.malecns when fly-harness[flybrain] and MaleCNS files "
+            "are already on disk (otherwise omit / HTTP 404; never downloads). "
+            "Switching species is deploy a sim + list an id. Not the harness, "
+            "not FlyWire dumps, not a hosted OpenWorm API, not a marketplace. "
+            "Binds 127.0.0.1 by default."
         ),
     )
     parser.add_argument("--host", default=DEFAULT_HOST, help="Bind address (default: 127.0.0.1)")
