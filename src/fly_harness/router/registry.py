@@ -1,7 +1,7 @@
-"""In-process ModelBackend registry for the optional local HTTP router.
+"""In-process ModelBackend registry for the optional biorouter process.
 
 Default ids: the 24-neuron in-process LIF fixture plus FakeDeployedSim
-stand-ins. This is a local map, not a marketplace catalog.
+stand-ins. A local map of deployed sims, not a marketplace catalog.
 """
 
 from __future__ import annotations

@@ -36,14 +36,14 @@ flygym = [
 mcp = [
     "fastmcp>=2.0",
 ]
-router = []
+biorouter = []
 
 [project.scripts]
 fly-harness-reflex-demo = "fly_harness.demo.reflex:main"
 fly-harness-loader-demo = "fly_harness.demo.loaded_circuit:main"
 fly-harness-mcp = "fly_harness.mcp.server:main"
 fly-harness-composed-demo = "fly_harness.demo.composed:main"
-fly-harness-router = "fly_harness.router.server:main"
+biorouter = "fly_harness.router.server:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/fly_harness"]

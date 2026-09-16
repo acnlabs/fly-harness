@@ -1,7 +1,9 @@
 """Stdlib HTTP process matching ``HttpModelBackend`` (POST /tick, /reset, GET /status).
 
-Bind ``127.0.0.1`` by default. This is a local port, not OpenRouter-the-company
-and not a hosted marketplace or billing gateway.
+Public CLI is ``biorouter`` (``python -m fly_harness.router`` is the same
+entry). Bind ``127.0.0.1`` by default. OpenRouter routes existing LLMs;
+biorouter routes existing deployed biological simulation models. Not the
+harness, not FlyWire dumps, not a marketplace.
 
 No FastAPI. Core (``BrainState`` / ``FlyHarness``) does not import this module.
 """
@@ -175,14 +177,15 @@ def serve(
     server = make_server(host, port, registry)
     ids = ", ".join(server.registry.registered_ids())
     print(
-        f"fly-harness local ModelBackend router on {base_url(server)} "
-        f"(models: {ids}). Local process, not OpenRouter-the-company.",
+        f"biorouter on {base_url(server)} (models: {ids}). "
+        "Routes deployed bio-sim models; not OpenRouter-the-company, "
+        "not the harness, not FlyWire dumps, not a marketplace.",
         flush=True,
     )
     try:
         server.serve_forever()
     except KeyboardInterrupt:
-        print("\nshutting down fly-harness-router", flush=True)
+        print("\nshutting down biorouter", flush=True)
     finally:
         server.shutdown()
         server.server_close()
@@ -190,12 +193,13 @@ def serve(
 
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="fly-harness-router",
+        prog="biorouter",
         description=(
-            "Optional local HTTP ModelBackend router (stdlib). "
-            "Already-deployed harness clients call POST /tick, POST /reset, "
-            "GET /status with an OpenRouter-shaped model field. "
-            "Not a marketplace, not OpenRouter-the-company, bind 127.0.0.1 by default."
+            "OpenRouter routes existing LLMs; biorouter routes existing "
+            "deployed biological simulation models. Same idea (model id), "
+            "different substrate. Local stdlib HTTP process (POST /tick, "
+            "POST /reset, GET /status). Not the harness, not FlyWire dumps, "
+            "not a marketplace. Binds 127.0.0.1 by default."
         ),
     )
     parser.add_argument("--host", default=DEFAULT_HOST, help="Bind address (default: 127.0.0.1)")

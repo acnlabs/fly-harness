@@ -1,4 +1,4 @@
-"""python -m fly_harness.router — local HTTP ModelBackend router."""
+"""python -m fly_harness.router — same process as the ``biorouter`` CLI."""
 
 from fly_harness.router.server import main
 

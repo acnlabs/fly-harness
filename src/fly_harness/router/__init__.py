@@ -1,7 +1,9 @@
-"""Optional local HTTP ModelBackend router process.
+"""Optional **biorouter** process: local HTTP routing for deployed bio-sim models.
 
-Stdlib only. Install extra ``fly-harness[router]`` (no extra packages) or just
-run ``fly-harness-router``. Not OpenRouter-the-company and not a marketplace.
+Stdlib only. Install extra ``fly-harness[biorouter]`` (no extra packages) or
+run ``biorouter`` / ``python -m fly_harness.router``. OpenRouter routes existing
+LLMs; biorouter routes existing deployed biological simulation models. Not the
+harness, not FlyWire dumps, not a marketplace.
 """
 
 from fly_harness.router.registry import (

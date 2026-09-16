@@ -1,4 +1,4 @@
-"""Optional local HTTP ModelBackend router — stdlib, no FastAPI extra required."""
+"""Optional biorouter extra — stdlib local HTTP process, no FastAPI."""
 
 from __future__ import annotations
 
@@ -72,8 +72,22 @@ def test_default_registry_has_lif_and_fake_ids() -> None:
 def test_cli_defaults_bind_localhost() -> None:
     parser = build_arg_parser()
     args = parser.parse_args([])
+    assert parser.prog == "biorouter"
     assert args.host == DEFAULT_HOST == "127.0.0.1"
     assert args.port == 8765
+    help_text = parser.format_help()
+    assert "fly-harness-router" not in help_text
+    assert "usage: biorouter" in help_text
+    assert "deployed biological simulation models" in (parser.description or "")
+
+
+def test_pyproject_exposes_biorouter_cli_and_extra() -> None:
+    text = Path(__file__).resolve().parents[1].joinpath("pyproject.toml").read_text(
+        encoding="utf-8"
+    )
+    assert "fly-harness-router" not in text
+    assert 'biorouter = "fly_harness.router.server:main"' in text
+    assert "biorouter = []" in text
 
 
 def test_http_client_ticks_fake_through_local_router() -> None:
