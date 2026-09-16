@@ -1,4 +1,4 @@
-"""Docking guide is docs-only: core stays model-agnostic; version stays 0.5.0."""
+"""Docking guide is docs-only: core stays model-agnostic; version pin follows the package."""
 
 from __future__ import annotations
 
@@ -10,10 +10,10 @@ from fly_harness import __version__
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_package_version_stays_0_5_0() -> None:
-    assert __version__ == "0.5.0"
+def test_package_version_stays_0_5_1() -> None:
+    assert __version__ == "0.5.1"
     pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
-    assert 'version = "0.5.0"' in pyproject
+    assert 'version = "0.5.1"' in pyproject
 
 
 def test_kernel_sources_do_not_import_flybrain_or_flygym() -> None:
