@@ -48,6 +48,7 @@ fly-harness-mcp = "fly_harness.mcp.server:main"
 fly-harness-composed-demo = "fly_harness.demo.composed:main"
 fly-harness-biorouter-demo = "fly_harness.demo.biorouter_loop:main"
 fly-harness-flybrain-demo = "fly_harness.demo.flybrain_loop:main"
+fly-harness-biorouter-flybrain-demo = "fly_harness.demo.biorouter_flybrain_loop:main"
 biorouter = "fly_harness.router.server:main"
 
 [tool.hatch.build.targets.wheel]

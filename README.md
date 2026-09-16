@@ -199,6 +199,21 @@ biorouter --host 127.0.0.1 --port 8765
 python examples/biorouter_loop.py --url http://127.0.0.1:8765
 ```
 
+## Example: biorouter routes flybrain.malecns through FlyHarness.step
+
+OpenRouter lists a provider id; **biorouter** lists `flybrain.malecns` the same way. This example **uses** the harness: local stdlib HTTP → `HttpModelBackend` / `DirectBioSimBackend(url=...)` → `FlyHarness.step({"loom": ...})`. It is not a harness feature — core stays model-agnostic. Default in-thread run registers a fake flybrain-shaped backend (32 neurons) so CI stays green without MaleCNS. `--real` only if `fly-harness[flybrain]` and files are already on disk (never downloads). Missing `flybrain.malecns` → HTTP 404. Not Google-hosted, not 160k parameters, not consciousness.
+
+```bash
+python examples/biorouter_flybrain_loop.py
+python examples/biorouter_flybrain_loop.py --real
+# or, after install:
+python -m fly_harness.demo.biorouter_flybrain_loop
+fly-harness-biorouter-flybrain-demo
+# attach to a process you already started (404 if that process did not list the id):
+biorouter --host 127.0.0.1 --port 8765
+python examples/biorouter_flybrain_loop.py --url http://127.0.0.1:8765
+```
+
 ## Load a sparse connectome
 
 `load_connectome` maps global neuron ids (any integers) onto contiguous local indices and builds a CSR weight matrix of shape `(n_subset, n_subset)`.
@@ -365,6 +380,13 @@ pytest tests/test_router.py tests/test_flybrain_adapter.py
 python examples/flybrain_loop.py
 # optional, only with extra + on-disk MaleCNS:
 # python examples/flybrain_loop.py --real
+```
+
+The biorouter → `flybrain.malecns` example is in-thread by default (fake 32-neuron backend listed under that id). Real MaleCNS through HTTP skips unless extra + data are already on disk:
+
+```bash
+pytest tests/test_biorouter_flybrain_example.py
+python examples/biorouter_flybrain_loop.py
 ```
 
 MCP tests mock FastMCP and do **not** start a live MCP client. They pass without `fly-harness[mcp]`. With the extra, a factory smoke checks FastMCP constructs (still no stdio client):
