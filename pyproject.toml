@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "fly-harness"
-version = "0.4.0"
+version = "0.5.0"
 description = "A minimal microkernel for sparse fly-inspired neural harnesses"
 readme = "README.md"
 license = "MIT"
@@ -37,6 +37,9 @@ mcp = [
     "fastmcp>=2.0",
 ]
 biorouter = []
+flybrain = [
+    "flybrain>=0.1",
+]
 
 [project.scripts]
 fly-harness-reflex-demo = "fly_harness.demo.reflex:main"
@@ -44,6 +47,7 @@ fly-harness-loader-demo = "fly_harness.demo.loaded_circuit:main"
 fly-harness-mcp = "fly_harness.mcp.server:main"
 fly-harness-composed-demo = "fly_harness.demo.composed:main"
 fly-harness-biorouter-demo = "fly_harness.demo.biorouter_loop:main"
+fly-harness-flybrain-demo = "fly_harness.demo.flybrain_loop:main"
 biorouter = "fly_harness.router.server:main"
 
 [tool.hatch.build.targets.wheel]

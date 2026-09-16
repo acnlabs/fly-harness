@@ -1,6 +1,6 @@
 # fly-harness
 
-**v0.4.0** — a sparse neural **harness**, not a fly-brain simulation.
+**v0.5.0** — a sparse neural **harness**, not a fly-brain simulation.
 
 Formula: **Agent = deployed bio-sim Model + harness**. The harness docks to a
 **running** sim through a stable contract. FlyWire / MaleCNS files are weight
@@ -19,7 +19,7 @@ The 24-neuron touch-reflex loop is a **test/demo fixture**. It is not the model,
 ## What this is not
 
 - **Not** a 140k-neuron FlyWire connectome, upload, or dense 140k×140k matrix
-- **Not** an arbitrary-scale whole-brain runtime (memory is bounded by the loaded subset)
+- **Not** an arbitrary-scale whole-brain runtime in the **core** (memory is bounded by the loaded subset). Optional `fly-harness[flybrain]` docks a third-party MaleCNS LIF (**166,700 neurons**, not 160k "parameters") — a dump you run locally, not a Google-hosted sim or the FlyWire website
 - **Not** `caveclient` or a built-in biomechanics engine — FlyGym/NeuroMechFly is an **optional body extra**, not the core product
 - **Not** an MCP microkernel or FastAPI service — MCP is an **optional protocol extra**, not the core product
 - **Not** OpenRouter-the-company, a marketplace, billing system, hosted cloud gateway, or public bio-sim catalog — `BioSimRouter` is a harness-side **port**; **biorouter** is an optional **local** HTTP process (stdlib, `127.0.0.1` by default)
@@ -49,6 +49,12 @@ pip install -e ".[mcp]"
 
 ```bash
 pip install -e ".[biorouter]"
+```
+
+**flybrain** is optional (third-party MaleCNS LIF). Core still does not import it. Default tests **do not** download `~/fly-data`:
+
+```bash
+pip install -e ".[flybrain]"
 ```
 
 ## The step loop
@@ -147,6 +153,37 @@ harness.step(observation)
 ```
 
 `FlyHarness.step(obs) -> action` is unchanged. This extra is not a 140k FlyWire runtime and does not download MaleCNS.
+
+## Optional extra: flybrain (first real Model)
+
+Formula: **Agent = deployed bio-sim Model + harness**. [`flybrain`](https://pypi.org/project/flybrain/) ([source](https://github.com/alextitonis/fly.ai)) is a third-party leaky integrate-and-fire sim over **MaleCNS v1.0** (**166,700 neurons**, 25.6M connections). Google/Janelia released a **dump**, not a hosted sim. This extra wraps a **running** `FlyBrain` as `FlyBrainBackend` (`tick` / `reset` / `n_neurons` / `model_id`) and keeps `FlyHarness.step(obs) -> action`. It does **not** rewrite flybrain, does **not** use `caveclient`, and is **not** a consciousness or upload claim. It is **not** ~160k "parameters".
+
+```python
+from fly_harness import FlyHarness
+from fly_harness.flybrain import (
+    FlyBrainBackend,
+    FlyBrainInjectEncoder,
+    FlyBrainReadoutDecoder,
+)
+
+backend = FlyBrainBackend.from_installed(download=False)  # files must already be on disk
+harness = FlyHarness(
+    encoder=FlyBrainInjectEncoder(backend.n_neurons, channels={"loom": (0, 1)}),
+    decoder=FlyBrainReadoutDecoder(backend.n_neurons),
+    backend=backend,
+)
+result = harness.step({"loom": 0.8})
+```
+
+Default example uses an in-process `FakeFlyBrain` (32 neurons). `--real` only runs if `flybrain` imports **and** MaleCNS files are already present; it will not download them:
+
+```bash
+python examples/flybrain_loop.py
+python examples/flybrain_loop.py --real
+# or
+python -m fly_harness.demo.flybrain_loop
+fly-harness-flybrain-demo
+```
 
 ## Example: biorouter through FlyHarness.step
 
@@ -287,7 +324,7 @@ An MCP host that calls `harness_step(touch_left, touch_right)` therefore steps t
 
 ## Tests
 
-GitHub Actions on `main` and pull requests runs `pip install -e ".[dev]"` then `pytest` — no FlyGym/MCP extras, no MuJoCo. Skip/mock tests in those extras still pass. The **biorouter** extra is stdlib-only, so its tests run in that same core CI.
+GitHub Actions on `main` and pull requests runs `pip install -e ".[dev]"` then `pytest` — no FlyGym/MCP/flybrain extras, no MuJoCo, **no MaleCNS download**. Skip/mock tests in those extras still pass. The **biorouter** extra is stdlib-only, so its tests run in that same core CI.
 
 Default local suite does **not** need MuJoCo. The FlyGym smoke test skips unless `flygym` imports and a NeuroMechFly sim can start:
 
@@ -319,6 +356,15 @@ The biorouter example is in-thread by default (no live `biorouter` daemon). Atta
 ```bash
 pytest tests/test_biorouter_example.py
 python examples/biorouter_loop.py
+```
+
+flybrain adapter tests use `FakeFlyBrain` and pass without the extra. Smoke runs only if `flybrain` imports **and** `~/fly-data` already has files (otherwise skip; CI does not download):
+
+```bash
+pytest tests/test_flybrain_adapter.py
+python examples/flybrain_loop.py
+# optional, only with extra + on-disk MaleCNS:
+# python examples/flybrain_loop.py --real
 ```
 
 MCP tests mock FastMCP and do **not** start a live MCP client. They pass without `fly-harness[mcp]`. With the extra, a factory smoke checks FastMCP constructs (still no stdio client):
