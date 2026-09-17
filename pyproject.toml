@@ -42,6 +42,7 @@ flybrain = [
 ]
 
 [project.scripts]
+fly-harness-check = "fly_harness.check:main"
 fly-harness-reflex-demo = "fly_harness.demo.reflex:main"
 fly-harness-loader-demo = "fly_harness.demo.loaded_circuit:main"
 fly-harness-mcp = "fly_harness.mcp.server:main"

@@ -28,7 +28,15 @@ The 24-neuron touch-reflex loop is a **test/demo fixture**. It is not the model,
 
 ## Install
 
-Python 3.10+ with `numpy` and `scipy`. Core install stays numpy/scipy-only:
+Python 3.10+ with `numpy` and `scipy`. Core install stays numpy/scipy-only.
+Just installed (PyPI) — then prove the kernel is alive:
+
+```bash
+pip install fly-harness
+fly-harness-check
+```
+
+From a clone (tests):
 
 ```bash
 pip install -e ".[dev]"
@@ -56,6 +64,66 @@ pip install -e ".[biorouter]"
 
 ```bash
 pip install -e ".[flybrain]"
+```
+
+## Usage walkthrough
+
+After install, prove the kernel is alive, then dock a Model you already run.
+The public call is always `FlyHarness.step(obs) -> action`. This is not a chat
+shell, web UI, or plugin marketplace. Not a consciousness or upload claim.
+Longer how-tos: [docs/usage.md](docs/usage.md). Contract:
+[docs/docking.md](docs/docking.md).
+
+### 1. Fixture reflex — just installed, no extras
+
+The 24-neuron touch-reflex is a **test fixture**. It proves encode → tick →
+decode. It is not a biological circuit.
+
+```bash
+pip install fly-harness
+fly-harness-check
+# or: python -m fly_harness
+```
+
+Prints `model_id`, `n_neurons`, `timestamp`, and one obs→action step on the
+in-process LIF (`fly-harness.in-process-lif`). CI runs the same check without
+extras.
+
+### 2. Direct `ModelBackend` — you already run a sim
+
+The harness core does **not** bind flybrain, c302, or any vendor Model.
+If you already have a ticking sim, wrap `ModelBackend` (`tick` / `reset` /
+`n_neurons` / `model_id`). The harness only encode → tick → decode.
+Examples and adapters (`examples/flybrain_loop.py`, `fly_harness.flybrain`)
+are **usage, not kernel**.
+
+```python
+from fly_harness import FlyHarness
+
+# sim is your already-running flybrain / c302 / other tickable Model
+backend = MySimBackend(sim)  # duck-typed: tick, reset, n_neurons, model_id
+harness = FlyHarness(encoder=encoder, decoder=decoder, backend=backend)
+result = harness.step(observation)
+```
+
+Sketch: [docs/usage.md](docs/usage.md). Runnable Direct example:
+`examples/flybrain_loop.py` (FakeFlyBrain in CI; `--real` only if MaleCNS
+files are already on disk — never downloads).
+
+### 3. biorouter model ids — same loop, pick an id
+
+Local stdlib HTTP (`127.0.0.1`). Same `FlyHarness.step`. Select
+`flybrain.malecns` or `c302.celegans`. Unknown ids are 404 /
+`UnknownModelError`. Not a hosted catalog.
+
+An extra is glue **only** when a third-party API is not already a
+`ModelBackend`: `fly-harness[flybrain]` wraps flybrain so biorouter can list
+`flybrain.malecns`. There is no `fly-harness[c302]` extra.
+
+```bash
+biorouter --host 127.0.0.1 --port 8765
+python examples/biorouter_flybrain_loop.py --url http://127.0.0.1:8765
+python examples/biorouter_c302_loop.py --url http://127.0.0.1:8765
 ```
 
 ## The step loop
@@ -386,12 +454,16 @@ fly-harness-body-loop-demo
 
 ## Tests
 
-GitHub Actions on `main` and pull requests runs `pip install -e ".[dev]"` then `pytest` — no FlyGym/MCP/flybrain extras, no MuJoCo, **no MaleCNS download**, **no OpenWorm Docker**. Skip/mock tests in those extras still pass. The **biorouter** extra is stdlib-only, so its tests run in that same core CI.
+GitHub Actions on `main` and pull requests runs `pip install -e ".[dev]"` then `pytest` — no FlyGym/MCP/flybrain extras, no MuJoCo, **no MaleCNS download**, **no OpenWorm Docker**. Skip/mock tests in those extras still pass. The **biorouter** extra is stdlib-only, so its tests run in that same core CI. The load-check (`fly-harness-check`) is core: toy in-process LIF, no extras.
 
 Default local suite does **not** need MuJoCo. The FlyGym smoke test skips unless `flygym` imports and a NeuroMechFly sim can start:
 
 ```bash
 pytest
+# load-check (just-installed path; no extras):
+pytest tests/test_check.py
+fly-harness-check
+python -m fly_harness
 # with the FlyGym extra, still skip-friendly if MuJoCo/display is missing:
 pytest -q
 # FlyGym smoke only:

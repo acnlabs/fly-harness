@@ -35,7 +35,10 @@ def test_kernel_sources_do_not_import_flybrain_or_flygym() -> None:
 def test_readme_points_at_docking_guide() -> None:
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     assert "docs/docking.md" in readme
+    assert "docs/usage.md" in readme
     assert "Docking your Model" in readme
+    assert "Usage walkthrough" in readme
+    assert "fly-harness-check" in readme
     assert "one listed" in readme.lower()
     assert "the harness docks flybrain" in readme  # negated in the same sentence
     assert "not “the harness docks flybrain”" in readme or 'not "the harness docks flybrain"' in readme
@@ -64,6 +67,8 @@ def test_docking_guide_covers_contract_and_listing() -> None:
         "FakeC302",
         "302",
         "hermaphrodite",
+        "usage.md",
+        "fly-harness-check",
     ):
         assert needle in guide, needle
     assert "the harness docks flybrain" in guide  # only as a negation

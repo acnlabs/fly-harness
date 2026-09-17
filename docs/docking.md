@@ -14,6 +14,8 @@ is one listed worm Model. Default CI registers `FakeC302` (**302** hermaphrodite
 neurons) so the id exists without NEURON / Docker / OpenWorm. Worm is **usage**,
 not a harness feature, not a fly-harness extra, not `fly-harness[c302]`, not a hosted OpenWorm API.
 
+Thin how-tos (fixture load-check, Direct dock, biorouter ids): [usage.md](usage.md).
+
 ## 1. Implement `ModelBackend`
 
 Structural typing (`typing.Protocol`). You do not subclass a framework. Required surface:
@@ -133,6 +135,8 @@ Do not treat these as a second Model or a flybrain product surface. They show th
 
 | Path | What it shows |
 | --- | --- |
+| `docs/usage.md` | Fixture `fly-harness-check`, Direct `ModelBackend`, biorouter model ids |
+| `tests/test_check.py` | Load-check CLI on the toy LIF (CI, no extras) |
 | `tests/test_backend.py` | `FakeDeployedSim` / `DirectBioSimBackend` / `BioSimRouter` through `FlyHarness.step` |
 | `examples/biorouter_loop.py` | Local HTTP → fixture ids (`fake.deployed`) |
 | `examples/biorouter_flybrain_loop.py` | Same HTTP path; `flybrain.malecns` as **one listed** id (fake in CI) |
