@@ -452,6 +452,29 @@ python -m fly_harness.demo.body_loop
 fly-harness-body-loop-demo
 ```
 
+## Example: same loop, swap Model
+
+Same FlyGym body. Same `obs → FlyHarness.step → action` loop. Swap only the
+Model. This does not claim better walking than FlyGym's own controllers.
+
+- **A** — default toy in-process LIF (`fly-harness.in-process-lif`, 24-neuron fixture)
+- **B** — biorouter id `flybrain.malecns`
+
+Reuses the body-loop / biorouter examples. Core does not bind a vendor Model.
+Default B lists a FakeFlyBrain under that id (32 neurons, **not** 166,700).
+`--real` only if `fly-harness[flybrain]` and MaleCNS files are already on disk
+(never downloads). Missing extra or data → **skip B** honestly; never a fake
+166k brain.
+
+```bash
+python examples/swap_brain.py
+python examples/swap_brain.py --real
+python examples/swap_brain.py --try-flygym
+# or, after install:
+python -m fly_harness.demo.swap_brain
+fly-harness-swap-brain-demo
+```
+
 ## Tests
 
 GitHub Actions on `main` and pull requests runs `pip install -e ".[dev]"` then `pytest` — no FlyGym/MCP/flybrain extras, no MuJoCo, **no MaleCNS download**, **no OpenWorm Docker**. Skip/mock tests in those extras still pass. The **biorouter** extra is stdlib-only, so its tests run in that same core CI. The load-check (`fly-harness-check`) is core: toy in-process LIF, no extras.
@@ -540,6 +563,15 @@ The body-loop example is stub body + fake `flybrain.malecns` in-thread (no MuJoC
 ```bash
 pytest tests/test_body_loop_example.py
 python examples/body_loop.py
+```
+
+The swap-Model example is the same body + the same loop with two `model_id`s
+(toy LIF, then `flybrain.malecns`). Default CI uses the fake listed id (no
+MaleCNS download). `--real` without extra/data skips B:
+
+```bash
+pytest tests/test_swap_brain_example.py
+python examples/swap_brain.py
 ```
 
 ## License

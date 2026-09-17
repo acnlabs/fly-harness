@@ -159,6 +159,28 @@ python examples/biorouter_c302_loop.py      # FakeC302, 302 neurons
 Missing extra or data → omit / 404. This is not a marketplace and not a
 second public hosted tickable-brain API.
 
+## Same loop, swap Model
+
+**same loop, swap Model.** The product difference is not a better fly. Keep
+the FlyGym body and the `obs → FlyHarness.step → action` loop; change only
+the Model.
+
+Runnable: `examples/swap_brain.py` (reuses the existing body-loop and
+biorouter examples; does not fork the kernel). Backend A is the default toy
+in-process LIF (`fly-harness.in-process-lif`). Backend B is listed id
+`flybrain.malecns`. Missing `fly-harness[flybrain]` extra or on-disk MaleCNS
+→ skip B; will not download; will not pretend **166,700** neurons. Default
+CI lists a 32-neuron FakeFlyBrain under that id so the swap path stays green
+without extras.
+
+This does not claim better walking than FlyGym's own controllers. Core does
+not bind a vendor Model.
+
+```bash
+python examples/swap_brain.py
+python examples/swap_brain.py --real
+```
+
 ## What this is not
 
 - Not a chat REPL, web UI, or plugin market

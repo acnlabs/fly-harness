@@ -176,6 +176,7 @@ Do not treat these as a second Model or a flybrain product surface. They show th
 | `examples/biorouter_c302_loop.py` | Same HTTP path; `c302.celegans` as **one listed** id (`FakeC302`, 302 neurons) |
 | `examples/flybrain_loop.py` | Using a third-party Model directly (not a harness feature) |
 | `examples/body_loop.py` | FlyGym-shaped obs through the same port to a listed id |
+| `examples/swap_brain.py` | Same FlyGym body + same `FlyHarness.step` loop; swap toy LIF vs `flybrain.malecns` |
 
 ## What this is not
 
