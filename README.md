@@ -1,6 +1,6 @@
 # fly-harness
 
-**v0.5.2** — a sparse neural **harness**, not a fly-brain simulation.
+**v0.5.3** — a sparse neural **harness**, not a fly-brain simulation.
 
 Formula: **Agent = Model + harness**. The harness docks to a **running** sim
 through a stable contract (`ModelBackend` only). FlyWire / MaleCNS files are
