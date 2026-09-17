@@ -124,7 +124,7 @@ def test_check_sources_do_not_bind_a_vendor_model() -> None:
 
 
 def test_usage_docs_cover_three_scenarios() -> None:
-    assert __version__ == "0.5.2"
+    assert __version__ == "0.5.3"
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     usage = (ROOT / "docs" / "usage.md").read_text(encoding="utf-8")
     docking = (ROOT / "docs" / "docking.md").read_text(encoding="utf-8")
@@ -151,6 +151,6 @@ def test_usage_docs_cover_three_scenarios() -> None:
     assert "fly-harness[c302]" in usage
     assert "There is **no**" in usage
     pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
-    assert 'version = "0.5.2"' in pyproject
+    assert 'version = "0.5.3"' in pyproject
     assert "fly-harness-check" in pyproject
     assert LoadCheckReport is not None
