@@ -57,6 +57,14 @@ def test_docking_guide_covers_contract_and_listing() -> None:
         "model_id",
         "timestamp",
         "FlyHarness.step",
+        "snapshot()",
+        "restore(...)",
+        "SnapshotUnsupportedError",
+        "not a silent no-op",
+        "BrainState.save",
+        "BrainState.load",
+        "flybrain / c302 / NEURON",
+        "fly-harness-check --save",
         "biorouter",
         "FakeDeployedSim",
         "UnknownModelError",
@@ -84,3 +92,23 @@ def test_docking_guide_covers_contract_and_listing() -> None:
     assert "hosted" in lower
     assert "not a fly-harness extra" in lower or "not a harness extra" in lower
     assert "deploy a sim" in lower or "list an id" in lower
+
+
+def test_no_resume_product_surface() -> None:
+    """Checkpoint is a ModelBackend port, not a fourth how-to or check --save."""
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    usage = (ROOT / "docs" / "usage.md").read_text(encoding="utf-8")
+    check = (ROOT / "src" / "fly_harness" / "check.py").read_text(encoding="utf-8")
+    assert "fly-harness-check --save" not in readme
+    assert "fly-harness-check --save" not in usage
+    assert "--save" not in check
+    assert "\n## 4." not in usage
+    assert "\n## 1." in usage
+    assert "\n## 2." in usage
+    assert "\n## 3." in usage
+    assert "Usage walkthrough" in readme
+    # README still has three numbered how-tos, not a resume scenario
+    assert "### 1. Fixture reflex" in readme
+    assert "### 2. Direct" in readme
+    assert "### 3. biorouter" in readme
+    assert "### 4." not in readme

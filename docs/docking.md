@@ -18,7 +18,7 @@ Thin how-tos (fixture load-check, Direct dock, biorouter ids): [usage.md](usage.
 
 ## 1. Implement `ModelBackend`
 
-Structural typing (`typing.Protocol`). You do not subclass a framework. Required surface:
+Structural typing (`typing.Protocol`). You do not subclass a framework. Port surface:
 
 | Member | Role |
 | --- | --- |
@@ -27,6 +27,7 @@ Structural typing (`typing.Protocol`). You do not subclass a framework. Required
 | `timestamp` | Clock after the last `tick` or `reset` |
 | `reset(potentials=None)` | Clear or restore neural state; rewind the clock |
 | `tick(input_current)` | One step: length-`n_neurons` current → neural output |
+| `snapshot()` / `restore(...)` | **Optional**, same family as `reset`. The harness loop can checkpoint without knowing the engine. Not required for structural typing. Missing (or no natural mapping) raises `SnapshotUnsupportedError` — not a silent no-op. |
 
 In-repo stand-in (tests, not a connectome dump): `FakeDeployedSim` in
 `src/fly_harness/backend.py`. Contract tests: `tests/test_backend.py`.
@@ -91,13 +92,45 @@ action = result.action
 `Encoder` / `Decoder` must emit and consume length-`n_neurons` vectors. `FlyHarness.step(obs) -> action`
 is encode → `tick` → decode. The harness does not load FlyWire or MaleCNS dumps here.
 
+Optional checkpoint: `FlyHarness.snapshot` / `restore` delegate to the docked
+backend. Default toy in-process LIF implements this via existing
+`BrainState.save` / `BrainState.load` (fixture JSON, not a universal Model format). Direct,
+HTTP, and biorouter **forward** only when the inner or remote already has a
+mapping; otherwise `SnapshotUnsupportedError`. The core does not invent
+flybrain / c302 / NEURON checkpoint formats. Glue adapters may map a vendor
+API if one already exists. This is not a fourth usage scenario and not
+`fly-harness-check --save`.
+
+```python
+from fly_harness import FlyHarness
+from fly_harness.demo.codec import ReflexDecoder, ReflexEncoder
+from fly_harness.demo.connectome import SENSORY_INDICES, build_reflex_connectome
+
+harness = FlyHarness(
+    build_reflex_connectome(),
+    ReflexEncoder(),
+    ReflexDecoder(),
+    sensory_indices=SENSORY_INDICES,
+)
+harness.step({"touch_left": 1.0, "touch_right": 0.0})
+harness.snapshot("toy-lif.json")  # InProcessLifBackend → BrainState.save
+
+later = FlyHarness(
+    build_reflex_connectome(),
+    ReflexEncoder(),
+    ReflexDecoder(),
+    sensory_indices=SENSORY_INDICES,
+)
+later.restore("toy-lif.json")  # timestamp and potentials continue
+```
+
 ## 2. Direct dock
 
 Pass your backend into `FlyHarness` (`backend=` or positionally). Helpers:
 
-- `DirectBioSimBackend(sim=...)` — wrap an in-process object
-- `DirectBioSimBackend(url=..., model_id=..., n_neurons=...)` — thin HTTP client if you already host `POST /tick`, `POST /reset`, `GET /status` with a `model` field
-- `FakeDeployedSim` — local stand-in so you can write tests without your sim
+- `DirectBioSimBackend(sim=...)` — wrap an in-process object. `snapshot` / `restore` forward only if that object already implements them
+- `DirectBioSimBackend(url=..., model_id=..., n_neurons=...)` — thin HTTP client if you already host `POST /tick`, `POST /reset`, `GET /status` with a `model` field. No invented `/snapshot` wire format; the client raises `SnapshotUnsupportedError`
+- `FakeDeployedSim` — local stand-in so you can write tests without your sim. Docking fixture, not a checkpoint format (`SnapshotUnsupportedError`)
 
 There are no FlyWire / CAVE / neuPrint clients in core.
 

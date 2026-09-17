@@ -12,7 +12,7 @@ The public contract is:
 2. **`FlyHarness.step(obs) -> action`** — encode → **`ModelBackend.tick`** → decode (default backend is the in-process LIF/rate circuit)
 3. **`Encoder` / `Decoder`** — `typing.Protocol` contracts (optional `BaseEncoder` / `BaseDecoder` ABCs; no string class-name checks)
 4. **`load_connectome`** — load a **circuit subset** from a local sparse edge list (`.npz` / `.csv`) into `BrainState`
-5. **`ModelBackend`** — swappable Model port: `tick` (encoded input → neural output), `reset`, `n_neurons`, `model_id`
+5. **`ModelBackend`** — swappable Model port: `tick` (encoded input → neural output), `reset`, `n_neurons`, `model_id`. Optional `snapshot` / `restore` (same family as `reset`; unsupported backends raise, never a silent no-op). See [docs/docking.md](docs/docking.md).
 
 The 24-neuron touch-reflex loop is a **test/demo fixture**. It is not the model, and it is not a scaled-down FlyWire brain.
 

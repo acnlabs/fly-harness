@@ -33,6 +33,11 @@ class ModelBackend(Protocol):
     ``tick`` consumes an encoded current vector and returns neural output
     (typically membrane potentials). The harness does not load FlyWire /
     MaleCNS dumps here — those are weight files, not a deployed Model.
+
+    Optional (same family as ``reset``; not required for structural typing):
+    ``snapshot`` / ``restore``. A harness loop may checkpoint without knowing
+    the engine. Missing methods raise ``SnapshotUnsupportedError`` — never a
+    silent no-op. The core does not invent flybrain / c302 / NEURON formats.
     """
 
     @property

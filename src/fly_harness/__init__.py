@@ -5,6 +5,7 @@ from fly_harness.backend import (
     DirectBioSimBackend,
     FakeDeployedSim,
     InProcessLifBackend,
+    SnapshotUnsupportedError,
     UnknownModelError,
 )
 from fly_harness.brain_state import BrainState
@@ -25,6 +26,7 @@ __all__ = [
     "HttpModelBackend",
     "InProcessLifBackend",
     "ModelBackend",
+    "SnapshotUnsupportedError",
     "UnknownModelError",
     "load_connectome",
 ]

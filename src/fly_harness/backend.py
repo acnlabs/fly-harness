@@ -12,6 +12,7 @@ The default in-process rate / leaky-integrator circuit is
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, Mapping
 
 import numpy as np
@@ -33,6 +34,61 @@ class UnknownModelError(LookupError):
             f"unknown model_id {model_id!r}; registered: {names}. "
             "BioSimRouter is an in-process port, not a marketplace."
         )
+
+
+class SnapshotUnsupportedError(NotImplementedError):
+    """Raised when ``snapshot`` / ``restore`` has no mapping on this backend.
+
+    Optional ``ModelBackend`` port, same family as ``reset``. Missing is an
+    explicit error, not a silent no-op. The harness does not invent vendor
+    checkpoint formats (flybrain / c302 / NEURON / remote HTTP).
+    """
+
+    def __init__(
+        self,
+        backend: Any | None = None,
+        *,
+        operation: str = "snapshot",
+        detail: str | None = None,
+    ) -> None:
+        name = type(backend).__name__ if backend is not None else "ModelBackend"
+        model_id = getattr(backend, "model_id", None)
+        id_part = f" ({model_id!r})" if model_id else ""
+        message = detail or (
+            f"{name}{id_part} has no {operation}() mapping. "
+            "snapshot/restore is an optional ModelBackend port; "
+            "missing is an explicit error, not a silent no-op. "
+            "The harness does not invent vendor checkpoint formats."
+        )
+        self.operation = operation
+        self.backend_type = name
+        super().__init__(message)
+
+
+def invoke_snapshot(backend: Any, *args: Any, **kwargs: Any) -> Any:
+    """Call ``backend.snapshot`` or raise ``SnapshotUnsupportedError``."""
+    return _invoke_checkpoint(backend, "snapshot", *args, **kwargs)
+
+
+def invoke_restore(backend: Any, *args: Any, **kwargs: Any) -> Any:
+    """Call ``backend.restore`` or raise ``SnapshotUnsupportedError``."""
+    return _invoke_checkpoint(backend, "restore", *args, **kwargs)
+
+
+def _invoke_checkpoint(backend: Any, operation: str, *args: Any, **kwargs: Any) -> Any:
+    fn = getattr(backend, operation, None)
+    if not callable(fn):
+        raise SnapshotUnsupportedError(backend, operation=operation)
+    try:
+        return fn(*args, **kwargs)
+    except SnapshotUnsupportedError:
+        raise
+    except NotImplementedError as exc:
+        raise SnapshotUnsupportedError(
+            backend,
+            operation=operation,
+            detail=str(exc) or None,
+        ) from exc
 
 
 def _as_current(input_current: np.ndarray, n_neurons: int) -> np.ndarray:
@@ -104,6 +160,33 @@ class InProcessLifBackend:
                 raise ValueError("potentials shape mismatch on reset")
             self.state.potentials[:] = arr
         self.state.timestamp = 0.0
+
+    def snapshot(self, path: str | Path | None = None) -> dict[str, Any]:
+        """Checkpoint this toy LIF via ``BrainState`` JSON.
+
+        Fixture format (``BrainState.save`` / ``load``), not a universal Model
+        file. ``path`` writes the JSON; the dict is always returned.
+        """
+        payload = self.state.to_dict()
+        if path is not None:
+            self.state.save(path)
+        return payload
+
+    def restore(self, snapshot: str | Path | dict[str, Any]) -> None:
+        """Load a toy-LIF ``BrainState`` checkpoint into this backend in place."""
+        if isinstance(snapshot, dict):
+            loaded = BrainState.from_dict(snapshot)
+        else:
+            loaded = BrainState.load(snapshot)
+        if loaded.n_neurons != self.n_neurons:
+            raise ValueError(
+                f"snapshot n_neurons {loaded.n_neurons} does not match "
+                f"backend n_neurons {self.n_neurons}"
+            )
+        self.state.potentials = np.asarray(loaded.potentials, dtype=np.float64).copy()
+        self.state.weights = loaded.weights.copy()
+        self.state.timestamp = float(loaded.timestamp)
+        self.state.neuron_labels = loaded.neuron_labels
 
     def tick(self, input_current: np.ndarray) -> np.ndarray:
         current = _as_current(input_current, self.n_neurons)
@@ -181,6 +264,12 @@ class FakeDeployedSim:
                 raise ValueError("potentials shape mismatch on reset")
             self.potentials[:] = arr
         self._timestamp = 0.0
+
+    def snapshot(self, *args: Any, **kwargs: Any) -> Any:
+        raise SnapshotUnsupportedError(self, operation="snapshot")
+
+    def restore(self, *args: Any, **kwargs: Any) -> Any:
+        raise SnapshotUnsupportedError(self, operation="restore")
 
     def tick(self, input_current: np.ndarray) -> np.ndarray:
         current = _as_current(input_current, self._n_neurons)
@@ -264,6 +353,14 @@ class DirectBioSimBackend:
 
     def reset(self, potentials: np.ndarray | None = None) -> None:
         self._impl.reset(potentials)
+
+    def snapshot(self, *args: Any, **kwargs: Any) -> Any:
+        """Forward only when the wrapped sim already has a snapshot mapping."""
+        return invoke_snapshot(self._impl, *args, **kwargs)
+
+    def restore(self, *args: Any, **kwargs: Any) -> Any:
+        """Forward only when the wrapped sim already has a restore mapping."""
+        return invoke_restore(self._impl, *args, **kwargs)
 
     def tick(self, input_current: np.ndarray) -> np.ndarray:
         return np.asarray(self._impl.tick(input_current), dtype=np.float64)
@@ -355,6 +452,14 @@ class BioSimRouter:
 
     def reset(self, potentials: np.ndarray | None = None) -> None:
         self.active.reset(potentials)
+
+    def snapshot(self, *args: Any, **kwargs: Any) -> Any:
+        """Forward only when the selected backend already has a snapshot mapping."""
+        return invoke_snapshot(self.active, *args, **kwargs)
+
+    def restore(self, *args: Any, **kwargs: Any) -> Any:
+        """Forward only when the selected backend already has a restore mapping."""
+        return invoke_restore(self.active, *args, **kwargs)
 
     def tick(self, input_current: np.ndarray) -> np.ndarray:
         return np.asarray(self.active.tick(input_current), dtype=np.float64)
