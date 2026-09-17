@@ -17,7 +17,7 @@ from typing import Any
 
 import numpy as np
 
-from fly_harness.backend import UnknownModelError
+from fly_harness.backend import SnapshotUnsupportedError, UnknownModelError
 
 
 class HttpModelBackend:
@@ -73,6 +73,28 @@ class HttpModelBackend:
         }
         data = self._request("POST", "/reset", payload)
         self._apply_state(data, fallback_timestamp=0.0)
+
+    def snapshot(self, *args: Any, **kwargs: Any) -> Any:
+        raise SnapshotUnsupportedError(
+            self,
+            operation="snapshot",
+            detail=(
+                "HttpModelBackend has no snapshot mapping; remote HTTP is "
+                "POST /tick, POST /reset, GET /status only. This client does "
+                "not invent a checkpoint wire format."
+            ),
+        )
+
+    def restore(self, *args: Any, **kwargs: Any) -> Any:
+        raise SnapshotUnsupportedError(
+            self,
+            operation="restore",
+            detail=(
+                "HttpModelBackend has no restore mapping; remote HTTP is "
+                "POST /tick, POST /reset, GET /status only. This client does "
+                "not invent a checkpoint wire format."
+            ),
+        )
 
     def tick(self, input_current: np.ndarray) -> np.ndarray:
         payload = {

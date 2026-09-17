@@ -7,7 +7,7 @@ from typing import Any
 
 import numpy as np
 
-from fly_harness.backend import InProcessLifBackend
+from fly_harness.backend import InProcessLifBackend, invoke_restore, invoke_snapshot
 from fly_harness.brain_state import BrainState
 from fly_harness.protocols import Decoder, Encoder, ModelBackend
 
@@ -132,6 +132,14 @@ class FlyHarness:
 
     def reset(self, potentials: np.ndarray | None = None) -> None:
         self.backend.reset(potentials)
+
+    def snapshot(self, *args: Any, **kwargs: Any) -> Any:
+        """Checkpoint the docked Model without the loop knowing the engine."""
+        return invoke_snapshot(self.backend, *args, **kwargs)
+
+    def restore(self, *args: Any, **kwargs: Any) -> Any:
+        """Restore a checkpoint into the docked Model."""
+        return invoke_restore(self.backend, *args, **kwargs)
 
     def step(self, observation: Any) -> StepResult:
         """Encode observation, advance the Model one tick, decode action."""
