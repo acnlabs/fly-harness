@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "fly-harness"
-version = "0.5.3"
+version = "0.5.4"
 description = "A minimal microkernel for sparse fly-inspired neural harnesses"
 readme = "README.md"
 license = "MIT"
@@ -25,6 +25,12 @@ dependencies = [
     "numpy>=1.24",
     "scipy>=1.10",
 ]
+
+[project.urls]
+Homepage = "https://github.com/acnlabs/fly-harness"
+Source = "https://github.com/acnlabs/fly-harness"
+Documentation = "https://github.com/acnlabs/fly-harness/blob/main/docs/docking.md"
+Changelog = "https://github.com/acnlabs/fly-harness/releases"
 
 [project.optional-dependencies]
 dev = [
