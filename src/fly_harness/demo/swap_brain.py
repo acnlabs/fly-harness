@@ -44,6 +44,8 @@ _BANNER = (
     "only the Model changes. A = toy in-process LIF "
     f"({DEFAULT_LIF_MODEL_ID}). B = biorouter id {FLYBRAIN_MODEL_ID}. "
     "Usage of extras, not a harness feature. Core does not bind a vendor Model. "
+    "FlyGym / CPG are not the harness kernel; FlyHarness.step is brain-level "
+    "above the motor CPG. "
     "This does not claim better walking than FlyGym's own controllers. "
     "Default B is FakeFlyBrain listed under that id (32 neurons, not 160k "
     "parameters, not 166,700). --real needs fly-harness[flybrain] and MaleCNS "

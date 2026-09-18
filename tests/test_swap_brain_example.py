@@ -83,6 +83,8 @@ def test_main_default_prints_both_model_ids(capsys: pytest.CaptureFixture[str]) 
     assert FLYBRAIN_MODEL_ID in out
     assert "does not claim better walking" in _BANNER
     assert "not a harness feature" in _BANNER
+    assert "motor CPG" in _BANNER
+    assert "brain-level" in _BANNER
     assert "will not pretend" in _BANNER.lower() or "Will not pretend" in _BANNER
     assert "166,700" in _BANNER
     assert "consciousness" in _BANNER.lower()
@@ -124,6 +126,11 @@ def test_readme_and_usage_point_at_same_loop_swap() -> None:
     assert "\n## 4." not in usage
     assert "Will not download" in usage or "will not download" in usage.lower()
     assert "166,700" in usage
+    assert "motor CPG" in usage
+    assert "brain-level" in usage
+    assert "not the harness kernel" in usage.replace("**", "")
+    assert "motor CPG" in readme
+    assert "brain-level" in readme
 
 
 @pytest.mark.skipif(
