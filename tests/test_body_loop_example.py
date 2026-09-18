@@ -93,11 +93,11 @@ def test_main_rejects_real_with_url() -> None:
         main(["--url", "http://127.0.0.1:8765", "--real"])
 
 
-def test_pyproject_exposes_example_script_and_keeps_0_5_4() -> None:
+def test_pyproject_exposes_example_script_and_keeps_0_5_5() -> None:
     text = Path(__file__).resolve().parents[1].joinpath("pyproject.toml").read_text(
         encoding="utf-8"
     )
-    assert 'version = "0.5.4"' in text
+    assert 'version = "0.5.5"' in text
     assert "fly-harness-body-loop-demo" in text
     assert "fly_harness.demo.body_loop:main" in text
 

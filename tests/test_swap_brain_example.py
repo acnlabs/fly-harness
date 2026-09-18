@@ -107,9 +107,9 @@ def test_main_real_runs_a_and_skips_b_without_data(capsys: pytest.CaptureFixture
     assert skip_real_b_reason().split(":")[0] in out or "skip B" in out
 
 
-def test_pyproject_exposes_script_and_keeps_0_5_4() -> None:
+def test_pyproject_exposes_script_and_keeps_0_5_5() -> None:
     text = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
-    assert 'version = "0.5.4"' in text
+    assert 'version = "0.5.5"' in text
     assert "fly-harness-swap-brain-demo" in text
     assert "fly_harness.demo.swap_brain:main" in text
 
