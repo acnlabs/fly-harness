@@ -366,7 +366,7 @@ print(result.action)  # ReflexAction(turn=1, forward=..., brake=...)
 
 ## Optional body: FlyGym / NeuroMechFly
 
-This is an **extension**, not the core product. It does not ship a 140k-neuron brain, does not rewrite FlyGym, and does not run MuJoCo unless you install the extra.
+This is an **extension**, not the core product. It does not ship a 140k-neuron brain, does not rewrite FlyGym, and does not run MuJoCo unless you install the extra. FlyGym / CPG are **not** the harness kernel: `FlyHarness.step` is brain-level, **above** the body's motor CPG.
 
 `FlyGymEncoder` / `FlyGymDecoder` map NeuroMechFly observations (joint angles, contact forces) and actions (joint targets, per-leg adhesion, optional muscle/tendon commands) onto `FlyHarness.step`. They work on dicts — no MuJoCo import. `FlyGymHarnessEnv` is a thin wrapper around an env **you** construct with FlyGym.
 
@@ -456,6 +456,8 @@ fly-harness-body-loop-demo
 
 Same FlyGym body. Same `obs → FlyHarness.step → action` loop. Swap only the
 Model. This does not claim better walking than FlyGym's own controllers.
+FlyGym / CPG are not the harness kernel; `FlyHarness.step` stays brain-level
+above the motor CPG.
 
 - **A** — default toy in-process LIF (`fly-harness.in-process-lif`, 24-neuron fixture)
 - **B** — biorouter id `flybrain.malecns`

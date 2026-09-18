@@ -165,6 +165,11 @@ second public hosted tickable-brain API.
 the FlyGym body and the `obs → FlyHarness.step → action` loop; change only
 the Model.
 
+FlyGym / CPG are **not** the harness kernel. NeuroMechFly's motor CPG lives
+in the body extra. `FlyHarness.step` is **brain-level** (encode →
+`ModelBackend.tick` → decode), **above** that motor CPG. Swapping the Model
+does not replace FlyGym's CPG.
+
 Runnable: `examples/swap_brain.py` (reuses the existing body-loop and
 biorouter examples; does not fork the kernel). Backend A is the default toy
 in-process LIF (`fly-harness.in-process-lif`). Backend B is listed id
