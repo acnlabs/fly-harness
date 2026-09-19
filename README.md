@@ -1,5 +1,7 @@
 # fly-harness
 
+[English](README.md) | [中文](README.zh-CN.md)
+
 **v0.5.5** — a sparse neural **harness**, not a fly-brain simulation.
 
 ![3D NeuroMechFly walk (FlyGym body; docs/usage display only)](https://raw.githubusercontent.com/NeLy-EPFL/_media/main/flygym/overview_video.gif)
