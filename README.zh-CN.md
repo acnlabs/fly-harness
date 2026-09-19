@@ -12,7 +12,9 @@
   <img src="docs/media/visual-demo/03-touch-right.png" alt="右侧触觉。转向 -1。CPG 左 0.40 右 1.20。" width="32%">
 </p>
 
-**v0.5.5** — 稀疏、模型无关的生物仿真 **harness（对接层）**。公式：**Agent = Model + harness**。你带来一台**正在运行**的仿真；公开调用是 `FlyHarness.step(obs) -> action`。
+**v0.5.5** — 面向正在运行的生物仿真的稀疏、模型无关 harness（对接层）。
+
+你带来一台正在 tick 的仿真。公开调用是 `FlyHarness.step(obs) -> action`。
 
 这段片段是 **usage**，不是内核功能：脑槽是 24 神经元 LIF fixture，腿仍由 FlyGym CPG 驱动。
 
