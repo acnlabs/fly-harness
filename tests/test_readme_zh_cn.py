@@ -45,7 +45,7 @@ def test_english_readme_body_stays_english_aside_from_switch() -> None:
     assert "**v0.5.5**" in rest
 
 
-def test_zh_readme_leads_with_same_clip_and_short_caption() -> None:
+def test_zh_readme_identity_then_clip() -> None:
     zh = ZH.read_text(encoding="utf-8")
     head = zh.split("## 安装", 1)[0]
     assert CLIP in head
@@ -54,17 +54,21 @@ def test_zh_readme_leads_with_same_clip_and_short_caption() -> None:
     assert "不是内核" in head
     assert "24 神经元 LIF fixture" in head
     assert "CPG" in head
-    assert "FlyHarness.step" in head
+    assert "FlyHarness.step" in zh
     assert "**v0.5.5**" in head
-    assert "24 神经元进程内 LIF fixture" in zh
-    assert "不需要先有一台正在跑的仿真" in zh
-    assert "替换 Model" in zh
+    assert "包在生物仿真外面" in head
+    assert "encode" in head
+    assert "Model.tick" in head
+    assert "24 神经元 fixture" in head
+    assert "替换那个 Model" in head
     assert "examples/swap_brain.py" in zh
     assert "fly-harness-swap-brain-demo" in zh
     assert "你带来一台正在 tick" not in zh
+    assert "不需要先有一台正在跑的仿真" not in zh
     assert "公式" not in zh
     assert "Agent = Model + harness" not in zh
-    assert head.index("NeuroMechFly") < head.index("**v0.5.5**")
+    assert head.index("包在生物仿真外面") < head.index(CLIP)
+    assert head.index("**v0.5.5**") < head.index("NeuroMechFly")
     assert "## 用法导览" not in zh
     assert "### 1. Fixture" not in zh
 
