@@ -2,6 +2,15 @@
 
 **v0.5.5** — a sparse neural **harness**, not a fly-brain simulation.
 
+![3D NeuroMechFly walk (FlyGym body; docs/usage display only)](https://raw.githubusercontent.com/NeLy-EPFL/_media/main/flygym/overview_video.gif)
+
+The 3D walk is **docs/usage display only** — not a kernel feature. Clip from
+[FlyGym / NeuroMechFly](https://github.com/NeLy-EPFL/flygym). The brain in
+the default loop is the **24-neuron LIF fixture**. Legs still run FlyGym's
+motor **CPG**. `FlyHarness.step` sits **above** that CPG. Not a
+166,700-neuron brain, not consciousness/upload, not Google-hosted, and
+not better walking than FlyGym's own controllers.
+
 Formula: **Agent = Model + harness**. The harness docks to a **running** sim
 through a stable contract (`ModelBackend` only). FlyWire / MaleCNS files are
 weight dumps, not that contract. The harness does not dock a specific model.
