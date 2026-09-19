@@ -36,15 +36,9 @@ def test_readme_points_at_docking_guide() -> None:
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     assert "docs/docking.md" in readme
     assert "docs/usage.md" in readme
-    assert "Docking your Model" in readme
-    assert "Usage walkthrough" in readme
     assert "fly-harness-check" in readme
-    assert "one listed" in readme.lower()
-    assert "the harness docks flybrain" in readme  # negated in the same sentence
-    assert "not “the harness docks flybrain”" in readme or 'not "the harness docks flybrain"' in readme
-    assert "c302.celegans" in readme
-    assert "FakeC302" in readme
-    assert "hermaphrodite" in readme.lower()
+    assert "## Usage walkthrough" not in readme
+    assert "### 1. Fixture reflex" not in readme
 
 
 def test_docking_guide_covers_contract_and_listing() -> None:
@@ -106,9 +100,9 @@ def test_no_resume_product_surface() -> None:
     assert "\n## 1." in usage
     assert "\n## 2." in usage
     assert "\n## 3." in usage
-    assert "Usage walkthrough" in readme
-    # README still has three numbered how-tos, not a resume scenario
-    assert "### 1. Fixture reflex" in readme
-    assert "### 2. Direct" in readme
-    assert "### 3. biorouter" in readme
+    assert "docs/usage.md" in readme
+    # Slim README is a front door; numbered how-tos live in docs/usage.md
+    assert "### 1. Fixture reflex" not in readme
+    assert "### 2. Direct" not in readme
+    assert "### 3. biorouter" not in readme
     assert "### 4." not in readme

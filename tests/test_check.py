@@ -128,23 +128,25 @@ def test_usage_docs_cover_three_scenarios() -> None:
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     usage = (ROOT / "docs" / "usage.md").read_text(encoding="utf-8")
     docking = (ROOT / "docs" / "docking.md").read_text(encoding="utf-8")
-    for doc in (readme, usage):
-        assert "fly-harness-check" in doc
-        assert "Fixture reflex" in doc or "fixture reflex" in doc.lower()
-        assert "ModelBackend" in doc
-        assert "encode" in doc and "tick" in doc and "decode" in doc
-        assert "flybrain.malecns" in doc
-        assert "c302.celegans" in doc
-        assert "usage, not kernel" in doc.lower() or "usage**, not kernel" in doc
-        assert "not a chat" in doc.lower()
-        assert "no extras" in doc.lower() or "No extras" in doc
-        lower = doc.lower()
-        assert "consciousness" in lower
-        assert "not a consciousness" in lower
-        assert "160k" in doc
-        assert "not" in doc.lower() and "google-hosted" in lower
-        assert "marketplace" not in lower or "not" in lower
+    assert "fly-harness-check" in readme
     assert "docs/usage.md" in readme
+    assert "docs/docking.md" in readme
+    assert "## Usage walkthrough" not in readme
+    assert "fly-harness-check" in usage
+    assert "Fixture reflex" in usage or "fixture reflex" in usage.lower()
+    assert "ModelBackend" in usage
+    assert "encode" in usage and "tick" in usage and "decode" in usage
+    assert "flybrain.malecns" in usage
+    assert "c302.celegans" in usage
+    assert "usage, not kernel" in usage.lower() or "usage**, not kernel" in usage
+    assert "not a chat" in usage.lower()
+    assert "no extras" in usage.lower() or "No extras" in usage
+    lower = usage.lower()
+    assert "consciousness" in lower
+    assert "not a consciousness" in lower
+    assert "160k" in usage
+    assert "google-hosted" in lower
+    assert "marketplace" not in lower or "not" in lower
     assert "docs/usage.md" in docking or "usage.md" in docking
     assert "fly-harness[flybrain]" in usage
     assert "not already a `ModelBackend`" in usage

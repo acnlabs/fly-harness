@@ -117,9 +117,7 @@ def test_pyproject_exposes_script_and_keeps_0_5_5() -> None:
 def test_readme_and_usage_point_at_same_loop_swap() -> None:
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     usage = (ROOT / "docs" / "usage.md").read_text(encoding="utf-8")
-    assert "same loop, swap Model" in readme
-    assert "examples/swap_brain.py" in readme
-    assert "does not claim better walking" in readme.lower() or "not claim better walking" in readme
+    assert "docs/usage.md" in readme
     assert "### 4." not in readme
     assert "same loop, swap Model" in usage
     assert "examples/swap_brain.py" in usage
@@ -129,8 +127,7 @@ def test_readme_and_usage_point_at_same_loop_swap() -> None:
     assert "motor CPG" in usage
     assert "brain-level" in usage
     assert "not the harness kernel" in usage.replace("**", "")
-    assert "motor CPG" in readme
-    assert "brain-level" in readme
+    assert "does not claim better walking" in usage.lower() or "not claim better walking" in usage
 
 
 @pytest.mark.skipif(
