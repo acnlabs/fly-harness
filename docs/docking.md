@@ -1,10 +1,10 @@
 # Docking a deployed bio-sim
 
-**fly-harness** is a port, not a catalog of brains. Formula: **Agent = Model + harness**.
-You bring a **running** sim. Direct dock and router dock are **usage**, not harness
-features. The core stays a model-agnostic `ModelBackend` contract. This file is not
-a FlyWire / MaleCNS runtime, not a marketplace, and not a consciousness or upload
-claim.
+**fly-harness** is a port, not a catalog of brains. The core stays a
+model-agnostic `ModelBackend` contract: obs → encode → Model.tick → decode →
+action. Direct dock and router dock are **usage**, not harness features. This
+file is not a FlyWire / MaleCNS runtime, not a marketplace, and not a
+consciousness or upload claim.
 
 `flybrain.malecns` is **one listed model** on local biorouter when that extra and
 on-disk data are present. It is not “the harness docks flybrain”.

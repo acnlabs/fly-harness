@@ -152,6 +152,18 @@ def test_usage_docs_cover_three_scenarios() -> None:
     assert "not already a `ModelBackend`" in usage
     assert "fly-harness[c302]" in usage
     assert "There is **no**" in usage
+    opening = usage.split("## 1.", 1)[0]
+    assert "sits around a biological sim" in opening
+    assert "Model.tick" in opening
+    assert "fly-harness-check" in opening
+    assert "swap Model" in opening
+    assert "do not need a sim already running" in opening
+    assert "Agent = Model + harness" not in opening
+    assert "Formula" not in opening
+    assert "dock a Model you already run" not in opening
+    dock_head = docking.split("## 1.", 1)[0]
+    assert "Formula:" not in dock_head
+    assert "Agent = Model + harness" not in dock_head
     pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
     assert 'version = "0.5.5"' in pyproject
     assert "fly-harness-check" in pyproject
