@@ -1,8 +1,11 @@
 # Usage walkthrough
 
-**fly-harness** is the harness half of **Agent = Model + harness**. After
-`pip install fly-harness`, prove the kernel is alive, then dock a Model you
-already run. The public call is always `FlyHarness.step(obs) -> action`.
+**fly-harness** sits around a biological sim: obs → encode → Model.tick →
+decode → action. The public call is `FlyHarness.step(obs) -> action`.
+
+Start with the shipped **24-neuron fixture**. `pip install fly-harness` then
+`fly-harness-check` is enough — you do not need a sim already running.
+Real use is plugging in a sim you run later: same loop, swap Model.
 
 This is not a chat shell, web UI, plugin marketplace, or hosted catalog of
 brains. The 24-neuron reflex is a **fixture**. The core does **not** bind
