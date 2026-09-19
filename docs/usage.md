@@ -11,14 +11,16 @@ not 160k “parameters”, not a Google-hosted tickable brain.
 
 Contract details: [docking.md](docking.md).
 
-![3D NeuroMechFly walk (FlyGym body; docs/usage display only)](https://raw.githubusercontent.com/NeLy-EPFL/_media/main/flygym/overview_video.gif)
+<video src="media/visual-demo/fly-walking.mp4" poster="media/visual-demo/01-walking.png" width="800" controls muted loop playsinline></video>
 
-The 3D walk is **docs/usage display only** — not a kernel feature. Clip from
-[FlyGym / NeuroMechFly](https://github.com/NeLy-EPFL/flygym). The brain in
-the default loop is the **24-neuron LIF fixture**. Legs still run FlyGym's
-motor **CPG**. `FlyHarness.step` sits **above** that CPG. Not a
-166,700-neuron brain, not consciousness/upload, not Google-hosted, and
-not better walking than FlyGym's own controllers.
+[15 s walk (mp4)](media/visual-demo/fly-walking.mp4) — NeuroMechFly on `FlatTerrain`: walk, then left touch, then right touch.
+
+The 3D walk is **docs/usage display only** — not a kernel feature. Recorded
+with the optional FlyGym body. The brain in the default loop is the
+**24-neuron LIF fixture**. Legs still run FlyGym's motor **CPG**.
+`FlyHarness.step` sits **above** that CPG. Not a 166,700-neuron brain, not
+consciousness/upload, not Google-hosted, and not better walking than
+FlyGym's own controllers.
 
 ## 1. Fixture reflex — just installed / tests / kernel is alive
 
