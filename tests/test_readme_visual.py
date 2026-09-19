@@ -37,7 +37,7 @@ def test_visual_demo_files_are_committed() -> None:
     assert right.read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
 
 
-def test_readme_leads_with_our_clip_not_flygym_gif() -> None:
+def test_readme_identity_then_clip_not_flygym_gif() -> None:
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     head = readme.split("## Install", 1)[0]
     assert CLIP in head
@@ -48,10 +48,13 @@ def test_readme_leads_with_our_clip_not_flygym_gif() -> None:
     assert "not a kernel feature" in head
     assert "24-neuron LIF fixture" in head
     assert "CPG" in head
-    assert "FlyHarness.step" in head
+    assert "FlyHarness.step" in readme
     assert "**v0.5.5**" in head
-    assert "24-neuron in-process LIF fixture" in readme
-    assert "do not need a running sim" in readme
+    assert "sits around a biological sim" in head
+    assert "encode" in head
+    assert "Model.tick" in head
+    assert "shipped 24-neuron fixture" in head
+    assert "swap that Model" in head
     assert "swap Model" in readme
     assert "examples/swap_brain.py" in readme
     assert "fly-harness-swap-brain-demo" in readme
@@ -59,6 +62,7 @@ def test_readme_leads_with_our_clip_not_flygym_gif() -> None:
     assert "Formula" not in readme
     assert "Agent = Model + harness" not in readme
     first_bash = readme.index("```bash")
+    assert head.index("sits around a biological sim") < head.index(CLIP)
     assert readme.index(CLIP) < first_bash
     assert "## Usage walkthrough" not in readme
     assert "### 1. Fixture reflex" not in readme
