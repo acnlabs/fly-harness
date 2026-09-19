@@ -152,6 +152,18 @@ def test_usage_docs_cover_three_scenarios() -> None:
     assert "not already a `ModelBackend`" in usage
     assert "fly-harness[c302]" in usage
     assert "There is **no**" in usage
+    demo_root = ROOT / "src" / "fly_harness" / "demo"
+    for name in (
+        "flybrain_loop.py",
+        "biorouter_flybrain_loop.py",
+        "body_loop.py",
+        "biorouter_c302_loop.py",
+        "swap_brain.py",
+        "biorouter_loop.py",
+    ):
+        banner = (demo_root / name).read_text(encoding="utf-8")
+        assert "Agent = Model + harness" not in banner
+        assert "Formula:" not in banner
     opening = usage.split("## 1.", 1)[0]
     assert "sits around a biological sim" in opening
     assert "Model.tick" in opening

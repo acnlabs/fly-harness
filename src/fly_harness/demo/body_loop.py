@@ -36,7 +36,7 @@ from fly_harness.router.server import running_router
 
 _BANNER = (
     "body-loop example: FlyGym obs → FlyHarness.step → local biorouter → "
-    "flybrain.malecns → decode FlyGym action. Agent = Model + harness. "
+    "flybrain.malecns → decode FlyGym action. obs → encode → Model.tick → decode → action. "
     "Usage of extras, not a harness feature. Default is StubFlyGymEnv + "
     "FakeFlyBrain (32 neurons, not 160k parameters, not 166,700). "
     "Not Google-hosted, not the FlyWire website, not a consciousness or upload "

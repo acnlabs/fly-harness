@@ -38,7 +38,7 @@ from fly_harness.router import create_default_backends, create_registry
 from fly_harness.router.server import running_router
 
 _BANNER = (
-    "biorouter → c302.celegans example: Agent = Model + harness. "
+    "biorouter → c302.celegans example: obs → encode → Model.tick → decode → action. "
     "Switching species is deploy a sim + list an id. Worm is usage, not a "
     "harness feature. OpenRouter lists a provider id; biorouter lists "
     "c302.celegans. FlyHarness.step goes through local stdlib HTTP. "
