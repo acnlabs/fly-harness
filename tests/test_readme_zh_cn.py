@@ -56,7 +56,11 @@ def test_zh_readme_leads_with_same_clip_and_short_caption() -> None:
     assert "CPG" in head
     assert "FlyHarness.step" in head
     assert "**v0.5.5**" in head
-    assert head.index("NeuroMechFly") < head.index("公式")
+    assert "正在 tick" in head
+    assert "生物仿真" in head
+    assert "公式" not in zh
+    assert "Agent = Model + harness" not in zh
+    assert head.index("NeuroMechFly") < head.index("**v0.5.5**")
     assert "## 用法导览" not in zh
     assert "### 1. Fixture" not in zh
 

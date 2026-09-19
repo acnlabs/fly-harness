@@ -12,7 +12,9 @@
   <img src="docs/media/visual-demo/03-touch-right.png" alt="TOUCH RIGHT. turn -1. CPG L 0.40 R 1.20." width="32%">
 </p>
 
-**v0.5.5** — a sparse, model-agnostic bio-sim **harness**. Formula: **Agent = Model + harness**. You bring a **running** sim; the public call is `FlyHarness.step(obs) -> action`.
+**v0.5.5** — a sparse, model-agnostic harness for a running biological simulation.
+
+You bring a ticking sim. The public call is `FlyHarness.step(obs) -> action`.
 
 The clip is **usage**, not a kernel feature: 24-neuron LIF fixture at the brain slot, FlyGym CPG still on the legs.
 
