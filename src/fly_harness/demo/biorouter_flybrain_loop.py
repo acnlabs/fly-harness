@@ -38,7 +38,7 @@ from fly_harness.router import FLYBRAIN_MODEL_ID, create_default_backends, creat
 from fly_harness.router.server import running_router
 
 _BANNER = (
-    "biorouter → flybrain.malecns example: Agent = Model + harness. "
+    "biorouter → flybrain.malecns example: obs → encode → Model.tick → decode → action. "
     "OpenRouter lists a provider id; biorouter lists flybrain.malecns. "
     "FlyHarness.step goes through local stdlib HTTP (not a harness feature). "
     "Default is FakeFlyBrain (32 neurons, not 160k parameters, not 166,700). "

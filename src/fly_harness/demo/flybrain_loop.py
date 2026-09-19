@@ -30,7 +30,7 @@ from fly_harness.harness import FlyHarness
 
 _BANNER = (
     "Example: FlyHarness.step with a third-party flybrain Model. "
-    "Agent = Model + harness. flybrain is a third-party LIF over MaleCNS v1.0 "
+    "obs → encode → Model.tick → decode → action. flybrain is a third-party LIF over MaleCNS v1.0 "
     "(166,700 neurons, not 160k parameters). Wiring it is using the harness, "
     "not a harness feature. Not Google-hosted, not the FlyWire website, not a "
     "consciousness or upload claim. Default loop is a FakeFlyBrain stub "
