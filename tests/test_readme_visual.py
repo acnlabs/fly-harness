@@ -50,8 +50,12 @@ def test_readme_leads_with_our_clip_not_flygym_gif() -> None:
     assert "CPG" in head
     assert "FlyHarness.step" in head
     assert "**v0.5.5**" in head
-    assert "ticking sim" in head
-    assert "running biological simulation" in head
+    assert "24-neuron in-process LIF fixture" in readme
+    assert "do not need a running sim" in readme
+    assert "swap Model" in readme
+    assert "examples/swap_brain.py" in readme
+    assert "fly-harness-swap-brain-demo" in readme
+    assert "You bring a ticking sim" not in readme
     assert "Formula" not in readme
     assert "Agent = Model + harness" not in readme
     first_bash = readme.index("```bash")

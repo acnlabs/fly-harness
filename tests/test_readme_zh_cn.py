@@ -56,8 +56,12 @@ def test_zh_readme_leads_with_same_clip_and_short_caption() -> None:
     assert "CPG" in head
     assert "FlyHarness.step" in head
     assert "**v0.5.5**" in head
-    assert "正在 tick" in head
-    assert "生物仿真" in head
+    assert "24 神经元进程内 LIF fixture" in zh
+    assert "不需要先有一台正在跑的仿真" in zh
+    assert "替换 Model" in zh
+    assert "examples/swap_brain.py" in zh
+    assert "fly-harness-swap-brain-demo" in zh
+    assert "你带来一台正在 tick" not in zh
     assert "公式" not in zh
     assert "Agent = Model + harness" not in zh
     assert head.index("NeuroMechFly") < head.index("**v0.5.5**")

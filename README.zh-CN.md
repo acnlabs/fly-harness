@@ -12,22 +12,22 @@
   <img src="docs/media/visual-demo/03-touch-right.png" alt="右侧触觉。转向 -1。CPG 左 0.40 右 1.20。" width="32%">
 </p>
 
-**v0.5.5** — 面向正在运行的生物仿真的稀疏、模型无关 harness（对接层）。
+**v0.5.5** — 面向生物仿真的稀疏、模型无关 harness（对接层）。公开调用是 `obs → FlyHarness.step → action`。
 
-你带来一台正在 tick 的仿真。公开调用是 `FlyHarness.step(obs) -> action`。
+默认路径：包里自带 **24 神经元进程内 LIF fixture**。安装并运行 `fly-harness-check` 就能开始 — 不需要先有一台正在跑的仿真。
 
 这段片段是 **usage**，不是内核功能：脑槽是 24 神经元 LIF fixture，腿仍由 FlyGym CPG 驱动。
 
 ## 安装
 
-Python 3.10+，依赖 `numpy` 和 `scipy`。
+Python 3.10+，依赖 `numpy` 和 `scipy`。fixture 已包含。
 
 ```bash
 pip install fly-harness
 fly-harness-check
 ```
 
-用法：[docs/usage.md](docs/usage.md)。契约：[docs/docking.md](docs/docking.md)。
+真正的用法是对接你已经在跑的仿真：同一条 `obs → FlyHarness.step → action` 回路，替换 Model（`examples/swap_brain.py` / `fly-harness-swap-brain-demo`）。可选 extra（FlyGym、biorouter、flybrain）见 [docs/usage.md](docs/usage.md)。契约：[docs/docking.md](docs/docking.md)。
 
 ## 这不是什么
 
