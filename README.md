@@ -12,22 +12,22 @@
   <img src="docs/media/visual-demo/03-touch-right.png" alt="TOUCH RIGHT. turn -1. CPG L 0.40 R 1.20." width="32%">
 </p>
 
-**v0.5.5** — a sparse, model-agnostic harness for a running biological simulation.
+**v0.5.5** — a sparse, model-agnostic harness for biological simulation. The public call is `obs → FlyHarness.step → action`.
 
-You bring a ticking sim. The public call is `FlyHarness.step(obs) -> action`.
+Default path: the **24-neuron in-process LIF fixture** ships with the package. Install and `fly-harness-check` are enough to start — you do not need a running sim.
 
 The clip is **usage**, not a kernel feature: 24-neuron LIF fixture at the brain slot, FlyGym CPG still on the legs.
 
 ## Install
 
-Python 3.10+ with `numpy` and `scipy`.
+Python 3.10+ with `numpy` and `scipy`. Fixture included.
 
 ```bash
 pip install fly-harness
 fly-harness-check
 ```
 
-How-tos: [docs/usage.md](docs/usage.md). Contract: [docs/docking.md](docs/docking.md).
+Real use is docking a sim you already run: same `obs → FlyHarness.step → action` loop, swap Model (`examples/swap_brain.py` / `fly-harness-swap-brain-demo`). Optional extras (FlyGym, biorouter, flybrain) live in [docs/usage.md](docs/usage.md). Contract: [docs/docking.md](docs/docking.md).
 
 ## What this is not
 
