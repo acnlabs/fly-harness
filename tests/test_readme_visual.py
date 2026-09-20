@@ -1,4 +1,4 @@
-"""README walking-fly visual is our clip, not FlyGym's GIF; version stays 0.5.5."""
+"""README walking-fly visual is our clip, not FlyGym's GIF; version stays 0.5.6."""
 
 from __future__ import annotations
 
@@ -14,10 +14,10 @@ FLYGYM_GIF = (
 CLIP = "docs/media/visual-demo/fly-walking.mp4"
 
 
-def test_package_version_stays_0_5_5() -> None:
-    assert __version__ == "0.5.5"
+def test_package_version_stays_0_5_6() -> None:
+    assert __version__ == "0.5.6"
     pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
-    assert 'version = "0.5.5"' in pyproject
+    assert 'version = "0.5.6"' in pyproject
 
 
 def test_visual_demo_files_are_committed() -> None:
@@ -49,7 +49,7 @@ def test_readme_identity_then_clip_not_flygym_gif() -> None:
     assert "24-neuron LIF fixture" in head
     assert "CPG" in head
     assert "FlyHarness.step" in readme
-    assert "**v0.5.5**" in head
+    assert "**v0.5.6**" in head
     assert "sits around a biological sim" in head
     assert "encode" in head
     assert "Model.tick" in head

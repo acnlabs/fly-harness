@@ -2,7 +2,7 @@
 
 [English](README.md) | [中文](README.zh-CN.md)
 
-**v0.5.5** — fly-harness 包在生物仿真外面：obs → encode → Model.tick → decode → action。
+**v0.5.6** — fly-harness 包在生物仿真外面：obs → encode → Model.tick → decode → action。
 
 从随包装运的 24 神经元 fixture 开始。之后如果你接入自己在跑的仿真并替换那个 Model，仍是同一条回路。
 
