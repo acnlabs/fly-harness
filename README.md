@@ -2,7 +2,7 @@
 
 [English](README.md) | [中文](README.zh-CN.md)
 
-**v0.5.5** — fly-harness sits around a biological sim: obs → encode → Model.tick → decode → action.
+**v0.5.6** — fly-harness sits around a biological sim: obs → encode → Model.tick → decode → action.
 
 Start with the shipped 24-neuron fixture. Same loop if you later plug in a sim you run and swap that Model.
 

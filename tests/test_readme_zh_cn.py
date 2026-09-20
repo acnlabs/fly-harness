@@ -1,4 +1,4 @@
-"""Chinese README is a slim translation; English body stays English; version stays 0.5.5."""
+"""Chinese README is a slim translation; English body stays English; version stays 0.5.6."""
 
 from __future__ import annotations
 
@@ -18,10 +18,10 @@ CLIP = "docs/media/visual-demo/fly-walking.mp4"
 CJK = re.compile(r"[\u4e00-\u9fff]")
 
 
-def test_package_version_stays_0_5_5() -> None:
-    assert __version__ == "0.5.5"
+def test_package_version_stays_0_5_6() -> None:
+    assert __version__ == "0.5.6"
     pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
-    assert 'version = "0.5.5"' in pyproject
+    assert 'version = "0.5.6"' in pyproject
     assert 'readme = "README.md"' in pyproject
 
 
@@ -42,7 +42,7 @@ def test_english_readme_body_stays_english_aside_from_switch() -> None:
     assert CJK.search(rest) is None
     assert CLIP in rest
     assert FLYGYM_GIF not in rest
-    assert "**v0.5.5**" in rest
+    assert "**v0.5.6**" in rest
 
 
 def test_zh_readme_identity_then_clip() -> None:
@@ -55,7 +55,7 @@ def test_zh_readme_identity_then_clip() -> None:
     assert "24 神经元 LIF fixture" in head
     assert "CPG" in head
     assert "FlyHarness.step" in zh
-    assert "**v0.5.5**" in head
+    assert "**v0.5.6**" in head
     assert "包在生物仿真外面" in head
     assert "encode" in head
     assert "Model.tick" in head
@@ -68,7 +68,7 @@ def test_zh_readme_identity_then_clip() -> None:
     assert "公式" not in zh
     assert "Agent = Model + harness" not in zh
     assert head.index("包在生物仿真外面") < head.index(CLIP)
-    assert head.index("**v0.5.5**") < head.index("NeuroMechFly")
+    assert head.index("**v0.5.6**") < head.index("NeuroMechFly")
     assert "## 用法导览" not in zh
     assert "### 1. Fixture" not in zh
 
@@ -98,4 +98,4 @@ def test_kernel_and_extras_untouched_by_zh_readme() -> None:
         assert "中文" not in text
     extras = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
     assert 'readme = "README.md"' in extras
-    assert 'version = "0.5.5"' in extras
+    assert 'version = "0.5.6"' in extras
